@@ -52,6 +52,20 @@ test_script:
     if ($TestExitCode -ne 0) {
         exit $TestExitCode
     }
+    
+    VsTest.Console.exe /logger:Appveyor GoogleTestExtension\GoogleTestAdapterUiTests\bin\$env:CONFIGURATION\GoogleTestAdapterUiTests.dll
+
+    $TestExitCode = $LASTEXITCODE
+
+    if(Test-Path GoogleTestExtension\GoogleTestAdapterUiTests\TestErrors) {
+        7z a TestErrors.zip GoogleTestExtension\GoogleTestAdapterUiTests\TestErrors\*
+        Push-AppveyorArtifact TestErrors.zip
+    }
+    
+    if ($TestExitCode -ne 0) {
+        exit $TestExitCode
+    }
+
 artifacts:
 - path: GoogleTestExtension\GoogleTestAdapterVSIX\bin\$(configuration)\GoogleTestAdapter-*.vsix
   name: GoogleTestAdapter
