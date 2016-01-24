@@ -9,13 +9,13 @@ environment:
     secure: 3+fpAMwxomiOZ5fzpb+3kjV4RvPSn0GRvFp71bZZs3QQr06zNU2Wvu4p77dmTKH+
 init:
 - ps: >-
-    if($env:APPVEYOR_REPO_TAG -neq "true") {
+    if ($env:APPVEYOR_REPO_TAG -ne "true") {
         # $blockRdp = $true
         iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     }
 install:
 - ps: >-
-    if($env:APPVEYOR_REPO_TAG -eq "true") {
+    if ($env:APPVEYOR_REPO_TAG -eq "true") {
         nuget install secure-file -ExcludeVersion
         secure-file\tools\secure-file -decrypt GoogleTestExtension\Keys\Key_Release.snk.enc -secret %RELEASE_KEY_PASSWORD%
     }
@@ -64,7 +64,7 @@ test_script:
 
     $TestExitCode = $LASTEXITCODE
 
-    if(Test-Path GoogleTestExtension\GoogleTestAdapterUiTests\TestErrors) {
+    if (Test-Path GoogleTestExtension\GoogleTestAdapterUiTests\TestErrors) {
         7z a TestErrors.zip GoogleTestExtension\GoogleTestAdapterUiTests\TestErrors\*
         Push-AppveyorArtifact TestErrors.zip
     }
