@@ -7,16 +7,16 @@ environment:
     secure: bFVGoXLR4/8VSClNH2s5qhXfJNwbJPbggNv6grvl+JaITuMkHLqvCw+48T0uKyFI
   RELEASE_KEY_PASSWORD:
     secure: 3+fpAMwxomiOZ5fzpb+3kjV4RvPSn0GRvFp71bZZs3QQr06zNU2Wvu4p77dmTKH+
-init:
-- ps: >-
-    if ($env:APPVEYOR_REPO_TAG -ne "true") {
-        # $blockRdp = $true
-        iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-    }
+#init:
+#- ps: >-
+#    if ($env:APPVEYOR_REPO_TAG -ne "true") {
+#    }
 install:
 - ps: >-
     if ($env:APPVEYOR_REPO_TAG -eq "true") {
         nuget install secure-file -ExcludeVersion
+        $blockRdp = $true
+        iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
         secure-file\tools\secure-file -decrypt GoogleTestExtension\Keys\Key_Release.snk.enc -secret %RELEASE_KEY_PASSWORD%
     }
 before_build: 
