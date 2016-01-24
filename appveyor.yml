@@ -11,14 +11,12 @@ init:
 - ps: >-
     if($env:APPVEYOR_REPO_TAG -neq "true") {
         # $blockRdp = $true
-
         iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     }
 install:
--ps: >-
+- ps: >-
     if($env:APPVEYOR_REPO_TAG -eq "true") {
         nuget install secure-file -ExcludeVersion
-
         secure-file\tools\secure-file -decrypt GoogleTestExtension\Keys\Key_Release.snk.enc -secret %RELEASE_KEY_PASSWORD%
     }
 before_build: 
