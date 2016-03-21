@@ -69,7 +69,7 @@ namespace GoogleTestAdapter
         public const string CategoryName = "Google Test Adapter";
         public const string PageGeneralName = "General";
         public const string PageParallelizationName = "Parallelization";
-        public const string PageAdvancedName = "Advanced";
+        public const string PageGoogleTestName = "Google Test";
 
         private const string SolutionDirPlaceholder = "$(SolutionDir)";
         public const string TestDirPlaceholder = "$(TestDir)";
@@ -77,13 +77,13 @@ namespace GoogleTestAdapter
         public const string ExecutablePlaceholder = "$(Executable)";
 
         private const string DescriptionOfPlaceholdersForBatches =
-           TestDirPlaceholder + " - path of a directory which can be used by the tests" +
-           ThreadIdPlaceholder + "\n - id of thread executing the current tests" +
-           SolutionDirPlaceholder + "\n - directory of the solution";
+           TestDirPlaceholder + " - path of a directory which can be used by the tests\n" +
+           ThreadIdPlaceholder + " - id of thread executing the current tests\n" +
+           SolutionDirPlaceholder + " - directory of the solution (only available inside VS)";
 
         private const string DescriptionOfPlaceholdersForExecutables =
-            DescriptionOfPlaceholdersForBatches +
-            ExecutablePlaceholder + "\n - executable containing the tests";
+            DescriptionOfPlaceholdersForBatches + "\n" +
+            ExecutablePlaceholder + " - executable containing the tests";
 
         #region GeneralOptionsPage
 
@@ -102,6 +102,149 @@ namespace GoogleTestAdapter
             + TestFinderRegex;
 
         public virtual string TestDiscoveryRegex => XmlOptions.TestDiscoveryRegex ?? OptionTestDiscoveryRegexDefaultValue;
+
+
+        public const string OptionPathExtension = "PATH extension";
+        public const string OptionPathExtensionDefaultValue = "";
+        public const string OptionPathExtensionDescription =
+            "If non-empty, the content will be appended to the PATH variable of the test execution and discovery processes.\nExample: C:\\MyBins;C:\\MyOtherBins";
+
+        public virtual string PathExtension => XmlOptions.PathExtension ?? OptionPathExtensionDefaultValue;
+
+
+        public const string TraitsRegexesPairSeparator = "//||//";
+        public const string TraitsRegexesRegexSeparator = "///";
+        public const string TraitsRegexesTraitSeparator = ",";
+        public const string OptionTraitsRegexesDefaultValue = "";
+        public const string OptionTraitsDescription = "Allows to override/add traits for testcases matching a regex. Traits are build up in 3 phases: 1st, traits are assigned to tests according to the 'Traits before' option. 2nd, the tests' traits (defined via the macros in GTA_Traits.h) are added to the tests, overriding traits from phase 1 with new values. 3rd, the 'Traits after' option is evaluated, again in an overriding manner.\nSyntax: "
+                                                 + TraitsRegexesRegexSeparator +
+                                                 " separates the regex from the traits, the trait's name and value are separated by "
+                                                 + TraitsRegexesTraitSeparator +
+                                                 " and each pair of regex and trait is separated by "
+                                                 + TraitsRegexesPairSeparator + ".\nExample: " +
+                                                 @"MySuite\.*"
+                                                 + TraitsRegexesRegexSeparator + "Type"
+                                                 + TraitsRegexesTraitSeparator + "Small"
+                                                 + TraitsRegexesPairSeparator +
+                                                 @"MySuite2\.*|MySuite3\.*"
+                                                 + TraitsRegexesRegexSeparator + "Type"
+                                                 + TraitsRegexesTraitSeparator + "Medium";
+
+        public const string OptionTraitsRegexesBefore = "Regex for setting test traits before test execution";
+
+        public virtual List<RegexTraitPair> TraitsRegexesBefore
+        {
+            get
+            {
+                string option = XmlOptions.TraitsRegexesBefore ?? OptionTraitsRegexesDefaultValue;
+                return RegexTraitParser.ParseTraitsRegexesString(option);
+            }
+        }
+
+        public const string OptionTraitsRegexesAfter = "Regex for setting test traits after test execution";
+
+        public virtual List<RegexTraitPair> TraitsRegexesAfter
+        {
+            get
+            {
+                string option = XmlOptions.TraitsRegexesAfter ?? OptionTraitsRegexesDefaultValue;
+                return RegexTraitParser.ParseTraitsRegexesString(option);
+            }
+        }
+
+
+        public const string OptionTestNameSeparator = "Test name separator";
+        public const string OptionTestNameSeparatorDefaultValue = "";
+        public const string OptionTestNameSeparatorDescription =
+            "Test names produced by Google Test might contain the character '/', which makes VS cut the name after the '/' if the test explorer window is not wide enough. This option's value, if non-empty, will replace the '/' character to avoid that behavior. Note that '\\', ' ', '|', and '-' produce the same behavior ('.', '_', ':', and '::' are known to work - there might be more). Note also that traits regexes are evaluated against the tests' display names (and must thus be consistent with this option).";
+
+        public virtual string TestNameSeparator => XmlOptions.TestNameSeparator ?? OptionTestNameSeparatorDefaultValue;
+
+
+        public const string OptionDebugMode = "Debug mode";
+        public const bool OptionDebugModeDefaultValue = false;
+        public const string OptionDebugModeDescription =
+            "If true, debug output will be printed to the test console.";
+
+        public virtual bool DebugMode => XmlOptions.DebugMode ?? OptionDebugModeDefaultValue;
+
+
+        public const string OptionAdditionalTestExecutionParams = "Additional test execution parameters";
+        public const string OptionAdditionalTestExecutionParamsDefaultValue = "";
+        public const string OptionAdditionalTestExecutionParamsDescription =
+            "Additional parameters for Google Test executable. Placeholders:\n"
+            + DescriptionOfPlaceholdersForExecutables;
+
+        public virtual string AdditionalTestExecutionParam => XmlOptions.AdditionalTestExecutionParam ?? OptionAdditionalTestExecutionParamsDefaultValue;
+
+
+        public const string OptionBatchForTestSetup = "Test setup batch file";
+        public const string OptionBatchForTestSetupDefaultValue = "";
+        public const string OptionBatchForTestSetupDescription =
+            "Batch file to be executed before test execution. If tests are executed in parallel, the batch file will be executed once per thread. Placeholders:\n"
+            + DescriptionOfPlaceholdersForBatches;
+
+        public virtual string BatchForTestSetup => XmlOptions.BatchForTestSetup ?? OptionBatchForTestSetupDefaultValue;
+
+
+        public const string OptionBatchForTestTeardown = "Test teardown batch file";
+        public const string OptionBatchForTestTeardownDefaultValue = "";
+        public const string OptionBatchForTestTeardownDescription =
+            "Batch file to be executed after test execution. If tests are executed in parallel, the batch file will be executed once per thread. Placeholders:\n"
+            + DescriptionOfPlaceholdersForBatches;
+
+        public virtual string BatchForTestTeardown => XmlOptions.BatchForTestTeardown ?? OptionBatchForTestTeardownDefaultValue;
+
+        #endregion
+
+        #region ParallelizationOptionsPage
+
+        public const string OptionEnableParallelTestExecution = "Parallel test execution";
+        public const bool OptionEnableParallelTestExecutionDefaultValue = false;
+        public const string OptionEnableParallelTestExecutionDescription =
+            "Parallel test execution is achieved by means of different threads, each of which is assigned a number of tests to be executed. The threads will then sequentially invoke the necessary executables to produce the according test results.";
+
+        public virtual bool ParallelTestExecution => XmlOptions.ParallelTestExecution ?? OptionEnableParallelTestExecutionDefaultValue;
+
+
+        public const string OptionMaxNrOfThreads = "Maximum number of threads";
+        public const int OptionMaxNrOfThreadsDefaultValue = 0;
+        public const string OptionMaxNrOfThreadsDescription =
+            "Maximum number of threads to be used for test execution (0: all available threads).";
+
+        public virtual int MaxNrOfThreads
+        {
+            get
+            {
+                int result = XmlOptions.MaxNrOfThreads ?? OptionMaxNrOfThreadsDefaultValue;
+                if (result <= 0 || result > Environment.ProcessorCount)
+                {
+                    result = Environment.ProcessorCount;
+                }
+                return result;
+            }
+        }
+
+        #endregion
+
+        #region GoogleTestOptionsPage
+
+        public const string OptionCatchExceptions = "Catch exceptions";
+        public const bool OptionCatchExceptionsDefaultValue = true;
+        public const string OptionCatchExceptionsDescription =
+            "Google Test catches exceptions by default; the according test fails and test execution continues. Choosing false lets exceptions pass through, allowing the debugger to catch them.\n"
+            + "Google Test option:" + GoogleTestConstants.CatchExceptions;
+
+        public virtual bool CatchExceptions => XmlOptions.CatchExceptions ?? OptionCatchExceptionsDefaultValue;
+
+
+        public const string OptionBreakOnFailure = "Break on failure";
+        public const bool OptionBreakOnFailureDefaultValue = false;
+        public const string OptionBreakOnFailureDescription =
+            "If enabled, a potentially attached debugger will catch assertion failures and automatically drop into interactive mode.\n"
+            + "Google Test option:" + GoogleTestConstants.BreakOnFailure;
+
+        public virtual bool BreakOnFailure => XmlOptions.BreakOnFailure ?? OptionBreakOnFailureDefaultValue;
 
 
         public const string OptionRunDisabledTests = "Also run disabled tests";
@@ -148,7 +291,8 @@ namespace GoogleTestAdapter
                                                            + GoogleTestConstants.ShuffleTestsSeedMaxValueAsString
                                                            + ": The given seed is used. See note of option '"
                                                            + OptionShuffleTests
-                                                           + "'.";
+                                                           + "'.\n"
+            + "Google Test option:" + GoogleTestConstants.ShuffleTestsSeedOption;
 
         public virtual int ShuffleTestsSeed
         {
@@ -162,143 +306,6 @@ namespace GoogleTestAdapter
                 return seed;
             }
         }
-
-
-        public const string TraitsRegexesPairSeparator = "//||//";
-        public const string TraitsRegexesRegexSeparator = "///";
-        public const string TraitsRegexesTraitSeparator = ",";
-        public const string OptionTraitsRegexesDefaultValue = "";
-        public const string OptionTraitsDescription = "Allows to override/add traits for testcases matching a regex. Traits are build up in 3 phases: 1st, traits are assigned to tests according to the 'Traits before' option. 2nd, the tests' traits (defined via the macros in GTA_Traits.h) are added to the tests, overriding traits from phase 1 with new values. 3rd, the 'Traits after' option is evaluated, again in an overriding manner.\nSyntax: "
-                                                 + TraitsRegexesRegexSeparator +
-                                                 " separates the regex from the traits, the trait's name and value are separated by "
-                                                 + TraitsRegexesTraitSeparator +
-                                                 " and each pair of regex and trait is separated by "
-                                                 + TraitsRegexesPairSeparator + ".\nExample: " +
-                                                 @"MySuite\.*"
-                                                 + TraitsRegexesRegexSeparator + "Type"
-                                                 + TraitsRegexesTraitSeparator + "Small"
-                                                 + TraitsRegexesPairSeparator +
-                                                 @"MySuite2\.*|MySuite3\.*"
-                                                 + TraitsRegexesRegexSeparator + "Type"
-                                                 + TraitsRegexesTraitSeparator + "Medium";
-
-        public const string OptionTraitsRegexesBefore = "Regex for setting test traits before test execution";
-
-        public virtual List<RegexTraitPair> TraitsRegexesBefore
-        {
-            get
-            {
-                string option = XmlOptions.TraitsRegexesBefore ?? OptionTraitsRegexesDefaultValue;
-                return RegexTraitParser.ParseTraitsRegexesString(option);
-            }
-        }
-
-        public const string OptionTraitsRegexesAfter = "Regex for setting test traits after test execution";
-
-        public virtual List<RegexTraitPair> TraitsRegexesAfter
-        {
-            get
-            {
-                string option = XmlOptions.TraitsRegexesAfter ?? OptionTraitsRegexesDefaultValue;
-                return RegexTraitParser.ParseTraitsRegexesString(option);
-            }
-        }
-
-
-        public const string OptionDebugMode = "Debug mode";
-        public const bool OptionDebugModeDefaultValue = false;
-        public const string OptionDebugModeDescription =
-            "If true, debug output will be printed to the test console.";
-
-        public virtual bool DebugMode => XmlOptions.DebugMode ?? OptionDebugModeDefaultValue;
-
-
-        public const string OptionAdditionalTestExecutionParams = "Additional test execution parameters";
-        public const string OptionAdditionalTestExecutionParamsDefaultValue = "";
-        public const string OptionAdditionalTestExecutionParamsDescription =
-            "Additional parameters for Google Test executable. Placeholders:\n"
-            + DescriptionOfPlaceholdersForExecutables;
-
-        public virtual string AdditionalTestExecutionParam => XmlOptions.AdditionalTestExecutionParam ?? OptionAdditionalTestExecutionParamsDefaultValue;
-
-        #endregion
-
-        #region ParallelizationOptionsPage
-
-        public const string OptionEnableParallelTestExecution = "Enable parallel test execution";
-        public const bool OptionEnableParallelTestExecutionDefaultValue = false;
-        public const string OptionEnableParallelTestExecutionDescription =
-            "Parallel test execution is achieved by means of different threads, each of which is assigned a number of tests to be executed. The threads will then sequentially invoke the necessary executables to produce the according test results.";
-
-        public virtual bool ParallelTestExecution => XmlOptions.ParallelTestExecution ?? OptionEnableParallelTestExecutionDefaultValue;
-
-
-        public const string OptionMaxNrOfThreads = "Maximum number of threads";
-        public const int OptionMaxNrOfThreadsDefaultValue = 0;
-        public const string OptionMaxNrOfThreadsDescription =
-            "Maximum number of threads to be used for test execution (0: all available threads).";
-
-        public virtual int MaxNrOfThreads
-        {
-            get
-            {
-                int result = XmlOptions.MaxNrOfThreads ?? OptionMaxNrOfThreadsDefaultValue;
-                if (result <= 0 || result > Environment.ProcessorCount)
-                {
-                    result = Environment.ProcessorCount;
-                }
-                return result;
-            }
-        }
-
-
-        public const string OptionBatchForTestSetup = "Test setup batch file";
-        public const string OptionBatchForTestSetupDefaultValue = "";
-        public const string OptionBatchForTestSetupDescription =
-            "Batch file to be executed before test execution. If tests are executed in parallel, the batch file will be executed once per thread. Placeholders:\n"
-            + DescriptionOfPlaceholdersForBatches;
-
-        public virtual string BatchForTestSetup => XmlOptions.BatchForTestSetup ?? OptionBatchForTestSetupDefaultValue;
-
-
-        public const string OptionBatchForTestTeardown = "Test teardown batch file";
-        public const string OptionBatchForTestTeardownDefaultValue = "";
-        public const string OptionBatchForTestTeardownDescription =
-            "Batch file to be executed after test execution. If tests are executed in parallel, the batch file will be executed once per thread. Placeholders:\n"
-            + DescriptionOfPlaceholdersForBatches;
-
-        public virtual string BatchForTestTeardown => XmlOptions.BatchForTestTeardown ?? OptionBatchForTestTeardownDefaultValue;
-
-        #endregion
-
-        #region AdvancedOptionsPage
-
-        public const string OptionReportWaitPeriod = "Wait period during result reporting";
-        public const int OptionReportWaitPeriodDefaultValue = 0;
-        public const string OptionReportWaitPeriodDescription =
-            "Sometimes, not all TestResults are recognized by VS. This is probably due to inter process communication - if anybody has a clean solution for this, please provide a patch. Until then, use this option to ovetcome such problems.\n" +
-            "During test reporting, 0: do not pause at all, n: pause for 1ms every nth test (the higher, the faster; 1 is slowest)";
-
-        public virtual int ReportWaitPeriod
-        {
-            get
-            {
-                int period = XmlOptions.ReportWaitPeriod ?? OptionReportWaitPeriodDefaultValue;
-                if (period < 0)
-                {
-                    period = OptionReportWaitPeriodDefaultValue;
-                }
-                return period;
-            }
-        }
-
-
-        public const string OptionDevelopmentMode = "Development mode";
-        public const bool OptionDevelopmentModeDefaultValue = false;
-        public const string OptionDevelopmentModeDescription =
-            "If true, dialogs will open which help to debug test discovery and execution code (which is executed in processes different to the one Visual Studio runs in).";
-
-        public virtual bool DevelopmentMode => XmlOptions.DevelopmentMode ?? OptionDevelopmentModeDefaultValue;
 
         #endregion
 

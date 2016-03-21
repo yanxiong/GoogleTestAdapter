@@ -26,13 +26,13 @@ namespace GoogleTestAdapter.TestAdapter.Settings
     {
 
         [TestMethod]
-        public void RunSettingsService_Instantiation_HasCorrectName()
+        public void Constructor__InstanceHasCorrectName()
         {
             Assert.AreEqual(GoogleTestConstants.SettingsName, new RunSettingsService(null).Name);
         }
 
         [TestMethod]
-        public void RunSettingsService_GentlyHandlesUserSettingsWithoutRunSettingsNode()
+        public void AddRunSettings_UserSettingsWithoutRunSettingsNode_Warning()
         {
             Mock<ILogger> mockLogger = new Mock<ILogger>();
             Mock<IRunSettingsConfigurationInfo> mockRunSettingsConfigInfo = new Mock<IRunSettingsConfigurationInfo>();
@@ -49,7 +49,7 @@ namespace GoogleTestAdapter.TestAdapter.Settings
         }
 
         [TestMethod]
-        public void RunSettingsService_GentlyHandlesBrokenSolutionSettings()
+        public void AddRunSettings_BrokenSolutionSettings_Warning()
         {
             Mock<ILogger> mockLogger = new Mock<ILogger>();
             Mock<IRunSettingsConfigurationInfo> mockRunSettingsConfigInfo = new Mock<IRunSettingsConfigurationInfo>();
@@ -61,20 +61,20 @@ namespace GoogleTestAdapter.TestAdapter.Settings
 
             service.AddRunSettings(xml, mockRunSettingsConfigInfo.Object, mockLogger.Object);
 
-            // 1: from global, 2: from solution, 3: from user test settings
+            // 1: from global, 2: from solution, 3, ShuffleTests: from user test settings
             AssertContainsSetting(xml, "AdditionalTestExecutionParam", "Global");
-            AssertContainsSetting(xml, "BatchForTestTeardown", "User");
+            AssertContainsSetting(xml, "ShuffleTests", "true");
             AssertContainsSetting(xml, "NrOfTestRepetitions", "1");
             AssertContainsSetting(xml, "MaxNrOfThreads", "3");
             AssertContainsSetting(xml, "ShuffleTestsSeed", "3");
-            AssertContainsSetting(xml, "ReportWaitPeriod", "3");
+            AssertContainsSetting(xml, "TraitsRegexesBefore", "User");
 
             mockLogger.Verify(l => l.Log(It.Is<MessageLevel>(ml => ml == MessageLevel.Warning), It.Is<string>(s => s.Contains("could not be parsed"))),
                 Times.Exactly(1));
         }
 
         [TestMethod]
-        public void RunSettingsService_CorrectOverridingHierarchy()
+        public void AddRunSettings_GlobalAndSolutionAndUserSettings_CorrectOverridingHierarchy()
         {
             Mock<ILogger> mockLogger = new Mock<ILogger>();
             Mock<IRunSettingsConfigurationInfo> mockRunSettingsConfigInfo = new Mock<IRunSettingsConfigurationInfo>();
@@ -86,14 +86,14 @@ namespace GoogleTestAdapter.TestAdapter.Settings
 
             service.AddRunSettings(xml, mockRunSettingsConfigInfo.Object, mockLogger.Object);
 
-            // 1: from global, 2: from solution, 3: from user test settings
+            // 1: from global, 2: from solution, 3, ShuffleTests: from user test settings
             AssertContainsSetting(xml, "AdditionalTestExecutionParam", "Global");
             AssertContainsSetting(xml, "BatchForTestSetup", "Solution");
-            AssertContainsSetting(xml, "BatchForTestTeardown", "User");
+            AssertContainsSetting(xml, "ShuffleTests", "true");
             AssertContainsSetting(xml, "NrOfTestRepetitions", "2");
             AssertContainsSetting(xml, "MaxNrOfThreads", "3");
             AssertContainsSetting(xml, "ShuffleTestsSeed", "3");
-            AssertContainsSetting(xml, "ReportWaitPeriod", "3");
+            AssertContainsSetting(xml, "TraitsRegexesBefore", "User");
         }
 
         private RunSettingsService SetupRunSettingsService(Mock<ILogger> mockLogger, string solutionRunSettingsFile)
@@ -102,7 +102,7 @@ namespace GoogleTestAdapter.TestAdapter.Settings
             globalRunSettings.AdditionalTestExecutionParam = "Global";
             globalRunSettings.NrOfTestRepetitions = 1;
             globalRunSettings.MaxNrOfThreads = 1;
-            globalRunSettings.ReportWaitPeriod = 1;
+            globalRunSettings.TraitsRegexesBefore = "Global";
 
             Mock<IGlobalRunSettings> mockGlobalRunSettings = new Mock<IGlobalRunSettings>();
             mockGlobalRunSettings.Setup(grs => grs.RunSettings).Returns(globalRunSettings);
@@ -113,7 +113,7 @@ namespace GoogleTestAdapter.TestAdapter.Settings
         private void AssertContainsSetting(XmlDocument xml, string nodeName, string value)
         {
             XmlNodeList list = xml.GetElementsByTagName(nodeName);
-            Assert.IsTrue(list.Count == 1);
+            Assert.AreEqual(1, list.Count);
             XmlNode node = list.Item(0);
             Assert.AreEqual(value, node.InnerText);
         }

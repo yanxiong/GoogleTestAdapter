@@ -33,7 +33,7 @@ namespace GoogleTestAdapter
 
 
         [TestMethod]
-        public void NrOfTestRepitionsHandlesInvalidValuesCorrectly()
+        public void NrOfTestRepitions_InvalidValue_ReturnsDefaultValue()
         {
             MockXmlOptions.Setup(o => o.NrOfTestRepetitions).Returns(-2);
             Assert.AreEqual(Options.OptionNrOfTestRepetitionsDefaultValue, TheOptions.NrOfTestRepetitions);
@@ -46,7 +46,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void ShuffleTestsSeedHandlesInvalidValuesCorrectly()
+        public void ShuffleTestsSeed_InvalidValue_ReturnsDefaultValue()
         {
             MockXmlOptions.Setup(o => o.ShuffleTestsSeed).Returns(-1);
             Assert.AreEqual(Options.OptionShuffleTestsSeedDefaultValue, TheOptions.ShuffleTestsSeed);
@@ -59,7 +59,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void MaxNrOfThreadsHandlesInvalidValuesCorrectly()
+        public void MaxNrOfThreads_InvalidValue_ReturnsDefaultValue()
         {
             MockXmlOptions.Setup(o => o.MaxNrOfThreads).Returns(-1);
             Assert.AreEqual(Environment.ProcessorCount, TheOptions.MaxNrOfThreads);
@@ -75,17 +75,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void ReportWaitPeriodHandlesInvalidValuesCorrectly()
-        {
-            MockXmlOptions.Setup(o => o.ReportWaitPeriod).Returns(-1);
-            Assert.AreEqual(Options.OptionReportWaitPeriodDefaultValue, TheOptions.ReportWaitPeriod);
-
-            MockXmlOptions.Setup(o => o.ReportWaitPeriod).Returns(4711);
-            Assert.AreEqual(4711, TheOptions.ReportWaitPeriod);
-        }
-
-        [TestMethod]
-        public void AdditionalTestParameter_PlaceholdersAreTreatedCorrectly()
+        public void AdditionalTestExecutionParam__PlaceholdersAreTreatedCorrectly()
         {
             MockXmlOptions.Setup(o => o.AdditionalTestExecutionParam).Returns(Options.TestDirPlaceholder);
             string result = TheOptions.GetUserParameters("", "mydir", 0);
@@ -109,7 +99,31 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void PrintTestOutput_ReturnsValueOrDefault()
+        public void CatchExceptions__ReturnsValueOrDefault()
+        {
+            MockXmlOptions.Setup(o => o.CatchExceptions).Returns((bool?)null);
+            bool result = TheOptions.CatchExceptions;
+            Assert.AreEqual(Options.OptionCatchExceptionsDefaultValue, result);
+
+            MockXmlOptions.Setup(o => o.CatchExceptions).Returns(!Options.OptionCatchExceptionsDefaultValue);
+            result = TheOptions.CatchExceptions;
+            Assert.AreEqual(!Options.OptionCatchExceptionsDefaultValue, result);
+        }
+
+        [TestMethod]
+        public void BreakOnFailure__ReturnsValueOrDefault()
+        {
+            MockXmlOptions.Setup(o => o.BreakOnFailure).Returns((bool?)null);
+            bool result = TheOptions.BreakOnFailure;
+            Assert.AreEqual(Options.OptionBreakOnFailureDefaultValue, result);
+
+            MockXmlOptions.Setup(o => o.BreakOnFailure).Returns(!Options.OptionBreakOnFailureDefaultValue);
+            result = TheOptions.BreakOnFailure;
+            Assert.AreEqual(!Options.OptionBreakOnFailureDefaultValue, result);
+        }
+
+        [TestMethod]
+        public void PrintTestOutput__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.PrintTestOutput).Returns((bool?)null);
             bool result = TheOptions.PrintTestOutput;
@@ -121,7 +135,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void RunDisabledTests_ReturnsValueOrDefault()
+        public void RunDisabledTests__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.RunDisabledTests).Returns((bool?)null);
             bool result = TheOptions.RunDisabledTests;
@@ -133,7 +147,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void ShuffleTests_ReturnsValueOrDefault()
+        public void ShuffleTests__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.ShuffleTests).Returns((bool?)null);
             bool result = TheOptions.ShuffleTests;
@@ -144,13 +158,8 @@ namespace GoogleTestAdapter
             Assert.AreEqual(!Options.OptionShuffleTestsDefaultValue, result);
         }
 
-        private void DoTest()
-        {
-
-        }
-
         [TestMethod]
-        public void DebugMode_ReturnsValueOrDefault()
+        public void DebugMode__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.DebugMode).Returns((bool?)null);
             bool result = TheOptions.DebugMode;
@@ -162,7 +171,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void ParallelTestExecution_ReturnsValueOrDefault()
+        public void ParallelTestExecution__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.ParallelTestExecution).Returns((bool?)null);
             bool result = TheOptions.ParallelTestExecution;
@@ -174,19 +183,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void DevelopmentMode_ReturnsValueOrDefault()
-        {
-            MockXmlOptions.Setup(o => o.DevelopmentMode).Returns((bool?)null);
-            bool result = TheOptions.DevelopmentMode;
-            Assert.AreEqual(Options.OptionDevelopmentModeDefaultValue, result);
-
-            MockXmlOptions.Setup(o => o.DevelopmentMode).Returns(!Options.OptionDevelopmentModeDefaultValue);
-            result = TheOptions.DevelopmentMode;
-            Assert.AreEqual(!Options.OptionDevelopmentModeDefaultValue, result);
-        }
-
-        [TestMethod]
-        public void TestDiscoveryRegex_ReturnsValueOrDefault()
+        public void TestDiscoveryRegex__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.TestDiscoveryRegex).Returns((string)null);
             string result = TheOptions.TestDiscoveryRegex;
@@ -198,7 +195,31 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void BatchForTestTeardown_ReturnsValueOrDefault()
+        public void TestNameSeparator__ReturnsValueOrDefault()
+        {
+            MockXmlOptions.Setup(o => o.TestNameSeparator).Returns((string)null);
+            string result = TheOptions.TestNameSeparator;
+            Assert.AreEqual(Options.OptionTestNameSeparatorDefaultValue, result);
+
+            MockXmlOptions.Setup(o => o.TestNameSeparator).Returns("FooBar");
+            result = TheOptions.TestNameSeparator;
+            Assert.AreEqual("FooBar", result);
+        }
+
+        [TestMethod]
+        public void PathExtension__ReturnsValueOrDefault()
+        {
+            MockXmlOptions.Setup(o => o.PathExtension).Returns((string)null);
+            string result = TheOptions.PathExtension;
+            Assert.AreEqual(Options.OptionPathExtensionDefaultValue, result);
+
+            MockXmlOptions.Setup(o => o.PathExtension).Returns("FooBar");
+            result = TheOptions.PathExtension;
+            Assert.AreEqual("FooBar", result);
+        }
+
+        [TestMethod]
+        public void BatchForTestTeardown__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.BatchForTestTeardown).Returns((string)null);
             string result = TheOptions.BatchForTestTeardown;
@@ -210,7 +231,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void BatchForTestSetup_ReturnsValueOrDefault()
+        public void BatchForTestSetup__ReturnsValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.BatchForTestSetup).Returns((string)null);
             string result = TheOptions.BatchForTestSetup;
@@ -222,7 +243,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void TraitsRegexesBefore_ReturnsParsedValueOrDefault()
+        public void TraitsRegexesBefore__ReturnsParsedValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.TraitsRegexesBefore).Returns((string)null);
             List<RegexTraitPair> result = TheOptions.TraitsRegexesBefore;
@@ -238,7 +259,7 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
-        public void TraitsRegexesAfter_ReturnsParsedValueOrDefault()
+        public void TraitsRegexesAfter__ReturnsParsedValueOrDefault()
         {
             MockXmlOptions.Setup(o => o.TraitsRegexesAfter).Returns((string)null);
             List<RegexTraitPair> result = TheOptions.TraitsRegexesAfter;

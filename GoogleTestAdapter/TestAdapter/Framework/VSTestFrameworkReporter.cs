@@ -1,29 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using GoogleTestAdapter.Helpers;
 using GoogleTestAdapter.Framework;
-using System;
+using GoogleTestAdapter.Model;
+using GoogleTestAdapter.TestAdapter.Helpers;
 
-namespace GoogleTestAdapter.TestAdapter.Helpers
+namespace GoogleTestAdapter.TestAdapter.Framework
 {
-    class VsTestFrameworkReporter : ITestFrameworkReporter
+    public class VsTestFrameworkReporter : ITestFrameworkReporter
     {
         private static readonly object Lock = new object();
 
         private IFrameworkHandle FrameworkHandle { get; }
         private ITestCaseDiscoverySink Sink { get; }
 
-        private TestEnvironment TestEnvironment { get; }
-
         private Throttle Throttle { get; }
+        private bool IsRunningInsideVisualStudio { get; }
 
+        public VsTestFrameworkReporter(ITestCaseDiscoverySink sink) : this(sink, null, false) { }
 
-        public VsTestFrameworkReporter(ITestCaseDiscoverySink sink, IFrameworkHandle frameworkHandle, TestEnvironment testEnvironment)
+        public VsTestFrameworkReporter(IFrameworkHandle frameworkHandle, bool isRunningInsideVisualStudio) : this(null, frameworkHandle, isRunningInsideVisualStudio) { }
+
+        private VsTestFrameworkReporter(ITestCaseDiscoverySink sink, IFrameworkHandle frameworkHandle, bool isRunningInsideVisualStudio)
         {
             Sink = sink;
             FrameworkHandle = frameworkHandle;
-            TestEnvironment = testEnvironment;
+            IsRunningInsideVisualStudio = isRunningInsideVisualStudio;
 
             // This is part of a workaround for a Visual Studio bug (see issue #15).
             // If test results are reported too quickly (100 or more in 500ms), the
@@ -56,19 +59,24 @@ namespace GoogleTestAdapter.TestAdapter.Helpers
         {
             lock (Lock)
             {
-                foreach (Model.TestCase testCase in testCases)
+                foreach (TestCase testCase in testCases)
                 {
                     FrameworkHandle.RecordStart(DataConversionExtensions.ToVsTestCase(testCase));
                 }
             }
         }
 
-        public void ReportTestResults(IEnumerable<Model.TestResult> testResults)
+        public void ReportTestResults(IEnumerable<TestResult> testResults)
         {
             lock (Lock)
             {
-                foreach (Model.TestResult testResult in testResults)
+                foreach (TestResult testResult in testResults)
                 {
+                    if (IsRunningInsideVisualStudio && (testResult.Outcome == TestOutcome.Failed || testResult.Outcome == TestOutcome.Skipped))
+                        testResult.ErrorMessage = Environment.NewLine + testResult.ErrorMessage;
+                    if (!IsRunningInsideVisualStudio && testResult.ErrorStackTrace != null)
+                        testResult.ErrorStackTrace = testResult.ErrorStackTrace.Trim();
+
                     ReportTestResult(testResult);
                 }
             }

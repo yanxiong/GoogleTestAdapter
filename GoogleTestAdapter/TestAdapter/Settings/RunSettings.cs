@@ -21,6 +21,15 @@ namespace GoogleTestAdapter.TestAdapter.Settings
         public string TestDiscoveryRegex { get; set; }
         public bool ShouldSerializeTestDiscoveryRegex() { return TestDiscoveryRegex != null; }
 
+        public string PathExtension { get; set; }
+        public bool ShouldSerializePathExtension() { return PathExtension != null; }
+
+        public bool? CatchExceptions { get; set; }
+        public bool ShouldSerializeCatchExceptions() { return CatchExceptions != null; }
+
+        public bool? BreakOnFailure { get; set; }
+        public bool ShouldSerializeBreakOnFailure() { return BreakOnFailure != null; }
+
         public bool? RunDisabledTests { get; set; }
         public bool ShouldSerializeRunDisabledTests() { return RunDisabledTests != null; }
 
@@ -39,6 +48,9 @@ namespace GoogleTestAdapter.TestAdapter.Settings
         public string TraitsRegexesAfter { get; set; }
         public bool ShouldSerializeTraitsRegexesAfter() { return TraitsRegexesAfter != null; }
 
+        public string TestNameSeparator { get; set; }
+        public bool ShouldSerializeTestNameSeparator() { return TestNameSeparator != null; }
+
         public bool? DebugMode { get; set; }
         public bool ShouldSerializeDebugMode() { return DebugMode != null; }
 
@@ -56,12 +68,6 @@ namespace GoogleTestAdapter.TestAdapter.Settings
 
         public string BatchForTestTeardown { get; set; }
         public bool ShouldSerializeBatchForTestTeardown() { return BatchForTestTeardown != null; }
-
-        public int? ReportWaitPeriod { get; set; }
-        public bool ShouldSerializeReportWaitPeriod() { return ReportWaitPeriod != null; }
-
-        public bool? DevelopmentMode { get; set; }
-        public bool ShouldSerializeDevelopmentMode() { return DevelopmentMode != null; }
 
 
         public override XmlElement ToXml()

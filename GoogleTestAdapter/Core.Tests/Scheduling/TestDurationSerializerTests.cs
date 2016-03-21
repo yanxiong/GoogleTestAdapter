@@ -12,7 +12,7 @@ namespace GoogleTestAdapter.Scheduling
     {
 
         [TestMethod]
-        public void DurationIsWrittenAndReadCorrectly()
+        public void UpdateTestDurations_SimpleTests_DurationsAreWrittenAndReadCorrectly()
         {
             string tempFile = Path.GetTempFileName();
             List<Model.TestResult> testResults = new List<Model.TestResult>
@@ -21,7 +21,7 @@ namespace GoogleTestAdapter.Scheduling
                 ToTestResult("TestSuite1.SkippedTest", Model.TestOutcome.Skipped, 1, tempFile)
             };
 
-            TestDurationSerializer serializer = new TestDurationSerializer(TestEnvironment);
+            var serializer = new TestDurationSerializer();
             serializer.UpdateTestDurations(testResults);
 
             string durationsFile = GetDurationsFile(serializer, tempFile);
@@ -37,7 +37,7 @@ namespace GoogleTestAdapter.Scheduling
         }
 
         [TestMethod]
-        public void SameTestsInDifferentExecutables()
+        public void UpdateTestDurations_SameTestsInDifferentExecutables_DurationsAreWrittenAndReadCorrectly()
         {
             string tempFile = Path.GetTempFileName();
             string tempFile2 = Path.GetTempFileName();
@@ -47,7 +47,7 @@ namespace GoogleTestAdapter.Scheduling
                 ToTestResult("TestSuite1.Test1", Model.TestOutcome.Failed, 4, tempFile2)
             };
 
-            TestDurationSerializer serializer = new TestDurationSerializer(TestEnvironment);
+            var serializer = new TestDurationSerializer();
             serializer.UpdateTestDurations(testResults);
 
             string durationsFile1 = GetDurationsFile(serializer, tempFile);
@@ -67,7 +67,7 @@ namespace GoogleTestAdapter.Scheduling
         }
 
         [TestMethod]
-        public void DurationIsUpdatedCorrectly()
+        public void UpdateTestDurations_SingleTest_DurationIsUpdatedCorrectly()
         {
             string tempFile = Path.GetTempFileName();
             List<Model.TestResult> testResults = new List<Model.TestResult>
@@ -75,7 +75,7 @@ namespace GoogleTestAdapter.Scheduling
                 ToTestResult("TestSuite1.Test1", Model.TestOutcome.Passed, 3, tempFile)
             };
 
-            TestDurationSerializer serializer = new TestDurationSerializer(TestEnvironment);
+            var serializer = new TestDurationSerializer();
             serializer.UpdateTestDurations(testResults);
             IDictionary<Model.TestCase, int> durations = serializer.ReadTestDurations(testResults.Select(tr => tr.TestCase));
             Assert.AreEqual(3, durations[testResults[0].TestCase]);
@@ -91,11 +91,11 @@ namespace GoogleTestAdapter.Scheduling
         }
 
         [TestMethod]
-        public void NoDurationFileResultsInEmptyDictionary()
+        public void ReadTestDurations_NoDurationFile_EmptyDictionary()
         {
             string tempFile = Path.GetTempFileName();
 
-            TestDurationSerializer serializer = new TestDurationSerializer(TestEnvironment);
+            var serializer = new TestDurationSerializer();
             IDictionary<Model.TestCase, int> durations = serializer.ReadTestDurations(ToTestCase("TestSuite1.Test1", tempFile).Yield());
 
             Assert.IsNotNull(durations);
@@ -103,7 +103,7 @@ namespace GoogleTestAdapter.Scheduling
         }
 
         [TestMethod]
-        public void DurationFileWithoutCurrentTestResultsInEmptyDictionary()
+        public void ReadTestDurations_DurationFileWithoutCurrentTest_EmptyDictionary()
         {
             string tempFile = Path.GetTempFileName();
             List<Model.TestResult> testResults = new List<Model.TestResult>
@@ -111,7 +111,7 @@ namespace GoogleTestAdapter.Scheduling
                 ToTestResult("TestSuite1.Test1", Model.TestOutcome.None, 3, tempFile)
             };
 
-            TestDurationSerializer serializer = new TestDurationSerializer(TestEnvironment);
+            var serializer = new TestDurationSerializer();
             serializer.UpdateTestDurations(testResults);
 
             IDictionary<Model.TestCase, int> durations = serializer.ReadTestDurations(

@@ -1,4 +1,4 @@
-version: 0.2.3.{build}
+version: 0.4.1.{build}
 os: Visual Studio 2015
 configuration: Release
 platform: Any CPU
@@ -8,22 +8,21 @@ environment:
   RELEASE_KEY_PASSWORD:
     secure: 3+fpAMwxomiOZ5fzpb+3kjV4RvPSn0GRvFp71bZZs3QQr06zNU2Wvu4p77dmTKH+
 install:
-- nuget install secure-file -ExcludeVersion
-- secure-file\tools\secure-file -decrypt GoogleTestAdapter\Keys\Key_Release.snk.enc -secret %RELEASE_KEY_PASSWORD%
+- ps: >-
+    if ($env:APPVEYOR_REPO_TAG -eq "true") {
+        nuget install secure-file -ExcludeVersion
+        secure-file\tools\secure-file -decrypt GoogleTestAdapter\Keys\Key_Release.snk.enc -secret $env:RELEASE_KEY_PASSWORD
+    } else {
+        # $blockRdp = $true
+        iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+    }
 before_build: 
-- cmd: >-
-    if "%APPVEYOR_REPO_TAG%" == "false" (del GoogleTestAdapter\Keys\Key_Release.snk)
+- ps: >-
+    Start-Process -WorkingDirectory GoogleTestAdapter -FilePath SetVersion.bat -ArgumentList $env:APPVEYOR_BUILD_VERSION
 
-    cd GoogleTestAdapter
+    Start-Process -WorkingDirectory GoogleTestAdapter\TestAdapter.Tests -FilePath IgnoreTests.bat -ArgumentList TestExecutorParallelTests.cs::RunTests_ParallelTestExecution_SpeedsUpTestExecution
 
-    SetVersion %APPVEYOR_BUILD_VERSION%
-
-    cd TestAdapter.Tests
-
-    IgnoreTests TestExecutorSequentialTests.cs::CancelingExecutorStopsTestExecution, TestExecutorParallelTests.cs::ParallelTestExecutionSpeedsUpTestExecution
-
-    cd ..\..
-- ps: nuget restore GoogleTestAdapter\GoogleTestAdapter.sln
+    nuget restore GoogleTestAdapter\GoogleTestAdapter.sln
 build:
   project: GoogleTestAdapter\GoogleTestAdapter.sln
   parallel: true
@@ -43,9 +42,20 @@ test_script:
 
     $coveralls = (Resolve-Path "GoogleTestAdapter/packages/coveralls.net.*/tools/csmacnz.coveralls.exe").ToString()
 
-    & $opencover -register:user -target:VsTest.Console.exe "-targetargs:/logger:Appveyor GoogleTestAdapter\DiaResolver.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.DiaResolver.Tests.dll GoogleTestAdapter\Core.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.Core.Tests.dll GoogleTestAdapter\TestAdapter.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.TestAdapter.Tests.dll" "-filter:+[*]* -[*Tests]* -[GoogleTestAdapter..VsPackage]*DialogPage -[GoogleTestAdapter.VsPackage]*TestExtensionOptionsPage -[GoogleTestAdapter.DiaResolver]*StubMemoryStream -[FluentAssertions*]*" -output:OpenCover_CoverageData.xml -returntargetcode
+    & $opencover -register:user -target:VsTest.Console.exe "-targetargs:/Logger:Appveyor GoogleTestAdapter\DiaResolver.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.DiaResolver.Tests.dll GoogleTestAdapter\Core.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.Core.Tests.dll GoogleTestAdapter\TestAdapter.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.TestAdapter.Tests.dll" "-filter:+[*]* -[*Tests]* -[GoogleTestAdapter..VsPackage]*DialogPage -[GoogleTestAdapter.VsPackage]*TestExtensionOptionsPage -[GoogleTestAdapter.DiaResolver]*StubMemoryStream -[FluentAssertions*]*" -output:OpenCover_CoverageData.xml -returntargetcode
 
     $TestExitCode = $LASTEXITCODE
+
+    & VsTest.Console GoogleTestAdapter\VsPackage.Tests\bin\$env:CONFIGURATION\GoogleTestAdapter.VsPackage.Tests.dll GoogleTestAdapter\VsPackage.Tests.Generated\bin\$env:CONFIGURATION\GoogleTestAdapter.VsPackage.Tests.Generated.dll /TestCaseFilter:"TestCategory=End to end" /Logger:Appveyor
+
+    if ($LASTEXITCODE -ne 0) {
+        $TestExitCode = $LASTEXITCODE
+    }
+
+    if (Test-Path GoogleTestAdapter\VsPackage.Tests.Generated\TestErrors) {
+        7z a TestErrors.zip GoogleTestAdapter\VsPackage.Tests.Generated\TestErrors\*
+        Push-AppveyorArtifact TestErrors.zip
+    }
 
     & $coveralls --opencover -i OpenCover_CoverageData.xml --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_JOB_ID --serviceName AppVeyor
 

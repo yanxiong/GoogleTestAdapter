@@ -10,8 +10,8 @@ namespace GoogleTestAdapter.Runners
 {
     public class PreparingTestRunner : ITestRunner
     {
-        public const string TEST_SETUP = "Test setup";
-        public const string TEST_TEARDOWN = "Test teardown";
+        public const string TestSetup = "Test setup";
+        public const string TestTeardown = "Test teardown";
 
         private TestEnvironment TestEnvironment { get; }
         private ITestRunner InnerTestRunner { get; }
@@ -28,7 +28,7 @@ namespace GoogleTestAdapter.Runners
         }
 
 
-        public void RunTests(IEnumerable<TestCase> allTestCases, IEnumerable<TestCase> testCasesToRun,
+        public void RunTests(IEnumerable<TestCase> allTestCases, IEnumerable<TestCase> testCasesToRun, string baseDir,
             string userParameters, bool isBeingDebugged, IDebuggedProcessLauncher debuggedLauncher)
         {
             DebugUtils.AssertIsNull(userParameters, nameof(userParameters));
@@ -42,13 +42,13 @@ namespace GoogleTestAdapter.Runners
 
                 string batch = TestEnvironment.Options.GetBatchForTestSetup(SolutionDirectory, testDirectory, ThreadId);
                 batch = batch == "" ? "" : SolutionDirectory + batch;
-                SafeRunBatch(TEST_SETUP, SolutionDirectory, batch, isBeingDebugged);
+                SafeRunBatch(TestSetup, SolutionDirectory, batch, isBeingDebugged);
 
-                InnerTestRunner.RunTests(allTestCases, testCasesToRun, userParameters, isBeingDebugged, debuggedLauncher);
+                InnerTestRunner.RunTests(allTestCases, testCasesToRun, baseDir, userParameters, isBeingDebugged, debuggedLauncher);
 
                 batch = TestEnvironment.Options.GetBatchForTestTeardown(SolutionDirectory, testDirectory, ThreadId);
                 batch = batch == "" ? "" : SolutionDirectory + batch;
-                SafeRunBatch(TEST_TEARDOWN, SolutionDirectory, batch, isBeingDebugged);
+                SafeRunBatch(TestTeardown, SolutionDirectory, batch, isBeingDebugged);
 
                 stopwatch.Stop();
                 TestEnvironment.DebugInfo($"Thread {ThreadId} took {stopwatch.Elapsed}");
@@ -99,7 +99,7 @@ namespace GoogleTestAdapter.Runners
         private void RunBatch(string batchType, string workingDirectory, string batch, bool isBeingDebugged)
         {
             int batchExitCode;
-            new ProcessLauncher(TestEnvironment, isBeingDebugged).GetOutputOfCommand(
+            new TestProcessLauncher(TestEnvironment, isBeingDebugged).GetOutputOfCommand(
                 workingDirectory, batch, "", false, false, null, out batchExitCode);
             if (batchExitCode == 0)
             {

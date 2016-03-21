@@ -40,7 +40,7 @@ namespace GoogleTestAdapter.TestAdapter
 
 
         [TestMethod]
-        public virtual void CheckThatTestDirectoryIsPassedViaCommandLineArg()
+        public virtual void RunTests_TestDirectoryViaUserParams_IsPassedViaCommandLineArg()
         {
             TestCase testCase = GetTestCasesOfSampleTests("CommandArgs.TestDirectoryIsSet").First();
 
@@ -58,20 +58,20 @@ namespace GoogleTestAdapter.TestAdapter
             executor = new TestExecutor(TestEnvironment);
             executor.RunTests(DataConversionExtensions.ToVsTestCase(testCase).Yield(), MockRunContext.Object, MockFrameworkHandle.Object);
 
-            MockFrameworkHandle.Verify(h => h.RecordEnd(It.IsAny<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase>(), It.Is<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome>(to => to == Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Passed)),
-                Times.Exactly(1));
             MockFrameworkHandle.Verify(h => h.RecordEnd(It.IsAny<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase>(), It.Is<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome>(to => to == Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Failed)),
                 Times.Exactly(0));
+            MockFrameworkHandle.Verify(h => h.RecordEnd(It.IsAny<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase>(), It.Is<Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome>(to => to == Microsoft.VisualStudio.TestPlatform.ObjectModel.TestOutcome.Passed)),
+                Times.Exactly(1));
         }
 
         [TestMethod]
-        public virtual void RunsExternallyLinkedX86TestsWithResult()
+        public virtual void RunTests_ExternallyLinkedX86Tests_CorrectTestResults()
         {
             RunAndVerifyTests(X86ExternallyLinkedTests, 2, 0, 0);
         }
 
         [TestMethod]
-        public virtual void RunsExternallyLinkedX86TestsWithResultInDebugMode()
+        public virtual void RunTests_ExternallyLinkedX86TestsInDebugMode_CorrectTestResults()
         {
             // for at least having the debug messaging code executed once
             MockOptions.Setup(o => o.DebugMode).Returns(true);
@@ -80,7 +80,7 @@ namespace GoogleTestAdapter.TestAdapter
         }
 
         [TestMethod]
-        public virtual void RunsStaticallyLinkedX86TestsWithResult()
+        public virtual void RunTests_StaticallyLinkedX86Tests_CorrectTestResults()
         {
             // let's print the test output
             MockOptions.Setup(o => o.PrintTestOutput).Returns(true);
@@ -89,40 +89,40 @@ namespace GoogleTestAdapter.TestAdapter
         }
 
         [TestMethod]
-        public virtual void RunsExternallyLinkedX64TestsWithResult()
+        public virtual void RunTests_ExternallyLinkedX64_CorrectTestResults()
         {
             RunAndVerifyTests(X64ExternallyLinkedTests, 2, 0, 0);
         }
 
         [TestMethod]
-        public virtual void RunsStaticallyLinkedX64TestsWithResult()
+        public virtual void RunTests_StaticallyLinkedX64Tests_CorrectTestResults()
         {
             RunAndVerifyTests(X64StaticallyLinkedTests, 1, 1, 0);
         }
 
         [TestMethod]
-        public virtual void RunsCrashingX64TestsWithoutResult()
+        public virtual void RunTests_CrashingX64Tests_CorrectTestResults()
         {
             RunAndVerifyTests(X64CrashingTests, 0, 2, 0);
         }
 
         [TestMethod]
-        public virtual void RunsCrashingX86TestsWithoutResult()
+        public virtual void RunTests_CrashingX86Tests_CorrectTestResults()
         {
             RunAndVerifyTests(X86CrashingTests, 0, 2, 0);
         }
 
         [TestMethod]
-        public virtual void RunsHardCrashingX86TestsWithoutResult()
+        public virtual void RunTests_HardCrashingX86Tests_CorrectTestResults()
         {
             TestExecutor executor = new TestExecutor(TestEnvironment);
             executor.RunTests(HardCrashingSampleTests.Yield(), MockRunContext.Object, MockFrameworkHandle.Object);
 
-            CheckMockInvocations(0, 1, 0, 3);
+            CheckMockInvocations(1, 2, 0, 3);
         }
 
         [TestMethod]
-        public virtual void RunsWithSetupAndTeardownBatches_TeardownFails_LogsWarning()
+        public virtual void RunTests_WithSetupAndTeardownBatchesWhereTeardownFails_LogsWarning()
         {
             MockOptions.Setup(o => o.BatchForTestSetup).Returns(Results0Batch);
             MockOptions.Setup(o => o.BatchForTestTeardown).Returns(Results1Batch);
@@ -130,15 +130,15 @@ namespace GoogleTestAdapter.TestAdapter
             RunAndVerifyTests(X86ExternallyLinkedTests, 2, 0, 0);
 
             MockLogger.Verify(l => l.LogWarning(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_SETUP))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestSetup))),
                 Times.Never);
             MockLogger.Verify(l => l.LogWarning(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_TEARDOWN))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestTeardown))),
                 Times.AtLeastOnce());
         }
 
         [TestMethod]
-        public virtual void RunsWithSetupAndTeardownBatches_SetupFails_LogsWarning()
+        public virtual void RunTests_WithSetupAndTeardownBatchesWhereSetupFails_LogsWarning()
         {
             MockOptions.Setup(o => o.BatchForTestSetup).Returns(Results1Batch);
             MockOptions.Setup(o => o.BatchForTestTeardown).Returns(Results0Batch);
@@ -146,47 +146,47 @@ namespace GoogleTestAdapter.TestAdapter
             RunAndVerifyTests(X64ExternallyLinkedTests, 2, 0, 0);
 
             MockLogger.Verify(l => l.LogWarning(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_SETUP))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestSetup))),
                 Times.AtLeastOnce());
             MockLogger.Verify(l => l.LogWarning(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_TEARDOWN))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestTeardown))),
                 Times.Never);
         }
 
         [TestMethod]
-        public virtual void RunsWithoutBatches_NoLogging()
+        public virtual void RunTests_WithoutBatches_NoLogging()
         {
             RunAndVerifyTests(X64ExternallyLinkedTests, 2, 0, 0);
 
             MockLogger.Verify(l => l.LogInfo(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_SETUP))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestSetup))),
                 Times.Never);
             MockLogger.Verify(l => l.LogWarning(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_SETUP))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestSetup))),
                 Times.Never);
             MockLogger.Verify(l => l.LogError(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_SETUP))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestSetup))),
                 Times.Never);
             MockLogger.Verify(l => l.LogInfo(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_TEARDOWN))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestTeardown))),
                 Times.Never);
             MockLogger.Verify(l => l.LogWarning(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_TEARDOWN))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestTeardown))),
                 Times.Never);
             MockLogger.Verify(l => l.LogError(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_TEARDOWN))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestTeardown))),
                 Times.Never);
         }
 
         [TestMethod]
-        public virtual void RunsWithNonexistingSetupBatch_LogsError()
+        public virtual void RunTests_WithNonexistingSetupBatch_LogsError()
         {
             MockOptions.Setup(o => o.BatchForTestSetup).Returns("some_nonexisting_file");
 
             RunAndVerifyTests(X64ExternallyLinkedTests, 2, 0, 0);
 
             MockLogger.Verify(l => l.LogError(
-                It.Is<string>(s => s.Contains(PreparingTestRunner.TEST_SETUP.ToLower()))),
+                It.Is<string>(s => s.Contains(PreparingTestRunner.TestSetup.ToLower()))),
                 Times.AtLeastOnce());
         }
 

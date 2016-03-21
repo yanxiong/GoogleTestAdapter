@@ -9,17 +9,17 @@ namespace GoogleTestAdapter.TestAdapter.Framework
     {
 
         [TestMethod]
-        public void DebuggedProcessLauncherTests_CalledWithParameters_InvokesFrameworkhandleCorrectly()
+        public void LaunchProcessWithDebuggerAttached_WithParameters_PassedInfoToFrameworkHandleCorrectly()
         {
             DebuggedProcessLauncher launcher = new DebuggedProcessLauncher(MockFrameworkHandle.Object);
 
-            launcher.LaunchProcessWithDebuggerAttached("theCommand", "theDir", "theParams");
+            launcher.LaunchProcessWithDebuggerAttached("theCommand", "theDir", "theParams", "C:\\test");
 
             MockFrameworkHandle.Verify(fh => fh.LaunchProcessWithDebuggerAttached(
                 It.Is<string>(s => s == "theCommand"),
                 It.Is<string>(s => s == "theDir"),
                 It.Is<string>(s => s == "theParams"),
-                It.IsAny<IDictionary<string, string>>()
+                It.Is<IDictionary<string, string>>(d => d.ContainsKey("PATH") && d["PATH"].StartsWith("C:\\test;"))
                 ), Times.Exactly(1));
         }
 

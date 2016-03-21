@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using GoogleTestAdapter.Helpers;
 using GoogleTestAdapter.Framework;
 using GoogleTestAdapter.TestAdapter.Framework;
-using GoogleTestAdapter.TestAdapter.Helpers;
 using GoogleTestAdapter.TestAdapter.Settings;
-using System;
 
 namespace GoogleTestAdapter.TestAdapter
 {
@@ -41,11 +40,9 @@ namespace GoogleTestAdapter.TestAdapter
                 Discoverer = new GoogleTestDiscoverer(TestEnvironment);
             }
 
-            new DebugHelper(TestEnvironment).CheckDebugModeForDiscoveryCode();
-
             try
             {
-                VsTestFrameworkReporter reporter = new VsTestFrameworkReporter(discoverySink, null, TestEnvironment);
+                VsTestFrameworkReporter reporter = new VsTestFrameworkReporter(discoverySink);
                 Discoverer.DiscoverTests(executables, reporter);
             }
             catch (Exception e)

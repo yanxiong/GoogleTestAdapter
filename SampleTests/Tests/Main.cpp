@@ -21,3 +21,14 @@ int main(int argc, char ** argv)
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
+void CheckIfZeroInMain(int i)
+{
+	EXPECT_EQ(0, i);
+}
+
+void HelpMethodWithScopedTrace()
+{
+	SCOPED_TRACE("Main HelperMethod");
+	CheckIfZeroInMain(1);
+}

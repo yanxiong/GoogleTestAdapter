@@ -20,13 +20,15 @@ namespace GoogleTestAdapter.TestResults
         private List<string> ConsoleOutput { get; }
         private List<TestCase> TestCasesRun { get; }
         private TestEnvironment TestEnvironment { get; }
+        private string BaseDir { get; }
 
 
-        public StandardOutputTestResultParser(IEnumerable<TestCase> testCasesRun, IEnumerable<string> consoleOutput, TestEnvironment testEnvironment)
+        public StandardOutputTestResultParser(IEnumerable<TestCase> testCasesRun, IEnumerable<string> consoleOutput, TestEnvironment testEnvironment, string baseDir)
         {
             this.ConsoleOutput = consoleOutput.ToList();
             this.TestCasesRun = testCasesRun.ToList();
             this.TestEnvironment = testEnvironment;
+            BaseDir = baseDir;
         }
 
 
@@ -101,7 +103,7 @@ namespace GoogleTestAdapter.TestResults
             return new TestResult(testCase)
             {
                 ComputerName = Environment.MachineName,
-                DisplayName = " ",
+                DisplayName = testCase.DisplayName,
                 Outcome = TestOutcome.Passed,
                 ErrorMessage = "",
                 Duration = duration
@@ -114,12 +116,16 @@ namespace GoogleTestAdapter.TestResults
             {
                 CrashedTestCase = testCase;
             }
+
+            ErrorMessageParser parser = new ErrorMessageParser(errorMessage, BaseDir);
+            parser.Parse();
             return new TestResult(testCase)
             {
                 ComputerName = Environment.MachineName,
-                DisplayName = crashed ? "because it CRASHED!" : " ",
+                DisplayName = testCase.DisplayName,
                 Outcome = TestOutcome.Failed,
-                ErrorMessage = errorMessage,
+                ErrorMessage = crashed ? CrashText : parser.ErrorMessage,
+                ErrorStackTrace = parser.ErrorStackTrace,
                 Duration = duration
             };
         }

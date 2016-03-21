@@ -1,4 +1,6 @@
-﻿using GoogleTestAdapter.Framework;
+﻿using System.Collections.Generic;
+using GoogleTestAdapter.Framework;
+using GoogleTestAdapter.Helpers;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace GoogleTestAdapter.TestAdapter.Framework
@@ -12,9 +14,12 @@ namespace GoogleTestAdapter.TestAdapter.Framework
             FrameworkHandle = handle;
         }
 
-        public int LaunchProcessWithDebuggerAttached(string command, string workingDirectory, string param)
+        public int LaunchProcessWithDebuggerAttached(string command, string workingDirectory, string param, string pathExtension)
         {
-            return FrameworkHandle.LaunchProcessWithDebuggerAttached(command, workingDirectory, param, null);
+            IDictionary<string, string> envVariables = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(pathExtension))
+                envVariables["PATH"] = Utils.GetExtendedPath(pathExtension);
+            return FrameworkHandle.LaunchProcessWithDebuggerAttached(command, workingDirectory, param, envVariables);
         }
     }
 

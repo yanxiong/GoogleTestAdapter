@@ -68,6 +68,16 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
+        public void GetTestsFromExecutable_WithPathExtension_FindsTestsWithLocation()
+        {
+            MockOptions.Setup(o => o.PathExtension).Returns(PathExtensionTestsDllDir);
+
+            GoogleTestDiscoverer discoverer = new GoogleTestDiscoverer(TestEnvironment);
+            IList<TestCase> testCases = discoverer.GetTestsFromExecutable(PathExtensionTestsExe);
+            Assert.AreEqual(72, testCases.Count);
+        }
+
+        [TestMethod]
         public void GetTestsFromExecutable_ExternallyLinkedX64Executable_FindsTestsWithLocation()
         {
             FindExternallyLinkedTests(X64ExternallyLinkedTests);
@@ -76,7 +86,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_SampleTests_FindsMathTestWithOneTrait()
         {
-            Trait[] traits = { new Trait("Type", "Small") };
+            Trait[] traits = { new Trait("Type", "Medium") };
             AssertFindsTestWithTraits("TestMath.AddPassesWithTraits", traits);
         }
 
@@ -90,7 +100,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_SampleTests_FindsMathTestWithThreeTraits()
         {
-            Trait[] traits = { new Trait("Type", "Small"), new Trait("Author", "CSO"), new Trait("Category", "Integration") };
+            Trait[] traits = { new Trait("Type", "Small"), new Trait("Author", "CSO"), new Trait("TestCategory", "Integration") };
             AssertFindsTestWithTraits("TestMath.AddPassesWithTraits3", traits);
         }
 
@@ -111,7 +121,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_SampleTests_FindsFixtureTestWithThreeTraits()
         {
-            Trait[] traits = { new Trait("Type", "Small"), new Trait("Author", "CSO"), new Trait("Category", "Integration") };
+            Trait[] traits = { new Trait("Type", "Small"), new Trait("Author", "CSO"), new Trait("TestCategory", "Integration") };
             AssertFindsTestWithTraits("TheFixture.AddPassesWithTraits3", traits);
         }
 
@@ -127,7 +137,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_SampleTests_FindsTypedTestWithTwoTraits()
         {
-            Trait[] traits = { new Trait("Author", "IBM"), new Trait("Category", "Integration") };
+            Trait[] traits = { new Trait("Author", "IBM"), new Trait("TestCategory", "Integration") };
             AssertFindsTestWithTraits("TypedTests/0.TwoTraits", traits);
             AssertFindsTestWithTraits("TypedTests/1.TwoTraits", traits);
             AssertFindsTestWithTraits("TypedTests/2.TwoTraits", traits);
@@ -137,7 +147,7 @@ namespace GoogleTestAdapter
         public void GetTestsFromExecutable_SampleTests_FindsTypedTestWithThreeTraits()
         {
             //ThreeTraits, Author, IBM, Category, Integration, Class, Simple
-            Trait[] traits = { new Trait("Author", "IBM"), new Trait("Category", "Integration"), new Trait("Class", "Simple"), };
+            Trait[] traits = { new Trait("Author", "IBM"), new Trait("TestCategory", "Integration"), new Trait("Class", "Simple"), };
             AssertFindsTestWithTraits("TypedTests/0.ThreeTraits", traits);
             AssertFindsTestWithTraits("TypedTests/1.ThreeTraits", traits);
             AssertFindsTestWithTraits("TypedTests/2.ThreeTraits", traits);
@@ -155,7 +165,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_SampleTests_FindsTypeParameterizedTestWithTwoTraits()
         {
-            Trait[] traits = { new Trait("Author", "HAL"), new Trait("Category", "Unit") };
+            Trait[] traits = { new Trait("Author", "HAL"), new Trait("TestCategory", "Unit") };
             AssertFindsTestWithTraits("Vec/TypeParameterizedTests/0.TwoTraits", traits);
             AssertFindsTestWithTraits("Arr/TypeParameterizedTests/0.TwoTraits", traits);
             AssertFindsTestWithTraits("Arr/TypeParameterizedTests/1.TwoTraits", traits);
@@ -165,7 +175,7 @@ namespace GoogleTestAdapter
         public void GetTestsFromExecutable_SampleTests_FindsTypeParameterizedTestWithThreeTraits()
         {
             //ThreeTraits, Author, IBM, Category, Integration, Class, Simple
-            Trait[] traits = { new Trait("Author", "HAL"), new Trait("Category", "Unit"), new Trait("Class", "Cake"), };
+            Trait[] traits = { new Trait("Author", "HAL"), new Trait("TestCategory", "Unit"), new Trait("Class", "Cake"), };
             AssertFindsTestWithTraits("Vec/TypeParameterizedTests/0.ThreeTraits", traits);
             AssertFindsTestWithTraits("Arr/TypeParameterizedTests/0.ThreeTraits", traits);
             AssertFindsTestWithTraits("Arr/TypeParameterizedTests/1.ThreeTraits", traits);
@@ -216,7 +226,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_SampleTests_FindsParameterizedTestWithThreeTraits()
         {
-            Trait[] traits = { new Trait("Type", "Medium"), new Trait("Author", "MSI"), new Trait("Category", "Integration") };
+            Trait[] traits = { new Trait("Type", "Medium"), new Trait("Author", "MSI"), new Trait("TestCategory", "Integration") };
             AssertFindsTestWithTraits("InstantiationName/ParameterizedTests.SimpleTraits3/0 [(1,)]", traits);
         }
 
@@ -238,7 +248,7 @@ namespace GoogleTestAdapter
         {
             MockOptions.Setup(o => o.TraitsRegexesBefore).Returns(new RegexTraitPair(Regex.Escape("TestMath.AddPassesWithTraits"), "Type", "SomeNewType").Yield().ToList());
 
-            Trait[] traits = { new Trait("Type", "Small") };
+            Trait[] traits = { new Trait("Type", "Medium") };
             AssertFindsTestWithTraits("TestMath.AddPassesWithTraits", traits);
         }
 
@@ -255,7 +265,7 @@ namespace GoogleTestAdapter
         [TestMethod]
         public void GetTestsFromExecutable_RegexAfterFromOptions_AfterTraitOverridesTraitFromTest()
         {
-            Trait[] traits = { new Trait("Type", "Small") };
+            Trait[] traits = { new Trait("Type", "Medium") };
             AssertFindsTestWithTraits("TestMath.AddPassesWithTraits", traits);
 
             MockOptions.Setup(o => o.TraitsRegexesAfter).Returns(new RegexTraitPair(Regex.Escape("TestMath.AddPassesWithTraits"), "Type", "SomeNewType").Yield().ToList());
@@ -288,7 +298,7 @@ namespace GoogleTestAdapter
             GoogleTestDiscoverer discoverer = new GoogleTestDiscoverer(TestEnvironment);
             IList<TestCase> testCases = discoverer.GetTestsFromExecutable(location);
 
-            Assert.AreEqual(61, testCases.Count);
+            Assert.AreEqual(72, testCases.Count);
 
             TestCase testCase =
                testCases.Single(tc => tc.FullyQualifiedName == "Arr/TypeParameterizedTests/1.CanDefeatMath");
@@ -352,6 +362,7 @@ namespace GoogleTestAdapter
             AssertFindsParameterizedTest(fullyQualifiedName, new Regex(Regex.Escape(displayName)));
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private void AssertFindsParameterizedTest(string fullyQualifiedName, Regex displayNameRegex)
         {
             Assert.IsTrue(File.Exists(SampleTests), "Build SampleTests in Debug mode before executing this test");

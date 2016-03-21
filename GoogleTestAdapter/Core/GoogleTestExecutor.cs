@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using GoogleTestAdapter.Helpers;
 using GoogleTestAdapter.Model;
@@ -37,7 +36,7 @@ namespace GoogleTestAdapter
                 ComputeTestRunner(reporter, isBeingDebugged, solutionDirectory);
             }
 
-            Runner.RunTests(allTestCasesInExecutables, testCasesToRunAsArray, null, isBeingDebugged, launcher);
+            Runner.RunTests(allTestCasesInExecutables, testCasesToRunAsArray, solutionDirectory, null, isBeingDebugged, launcher);
             TestEnvironment.LogInfo("Test execution completed.");
         }
 

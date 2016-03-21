@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
-using GoogleTestAdapter;
 
-namespace GoogleTestAdapterVSIX.OptionsPages
+namespace GoogleTestAdapter.VsPackage.OptionsPages
 {
 
     public class GeneralOptionsDialogPage : NotifyingDialogPage
@@ -27,44 +26,14 @@ namespace GoogleTestAdapterVSIX.OptionsPages
         private string testDiscoveryRegex = Options.OptionTestDiscoveryRegexDefaultValue;
 
         [Category(Options.CategoryName)]
-        [DisplayName(Options.OptionRunDisabledTests)]
-        [Description(Options.OptionRunDisabledTestsDescription)]
-        public bool RunDisabledTests
+        [DisplayName(Options.OptionPathExtension)]
+        [Description(Options.OptionPathExtensionDescription)]
+        public string PathExtension
         {
-            get { return runDisabledTests; }
-            set { SetAndNotify(ref runDisabledTests, value); }
+            get { return pathExtension; }
+            set { SetAndNotify(ref pathExtension, value); }
         }
-        private bool runDisabledTests = Options.OptionRunDisabledTestsDefaultValue;
-
-        [Category(Options.CategoryName)]
-        [DisplayName(Options.OptionNrOfTestRepetitions)]
-        [Description(Options.OptionNrOfTestRepetitionsDescription)]
-        public int NrOfTestRepetitions
-        {
-            get { return nrOfTestRepetitions; }
-            set { SetAndNotify(ref nrOfTestRepetitions, value); }
-        }
-        private int nrOfTestRepetitions = Options.OptionNrOfTestRepetitionsDefaultValue;
-
-        [Category(Options.CategoryName)]
-        [DisplayName(Options.OptionShuffleTests)]
-        [Description(Options.OptionShuffleTestsDescription)]
-        public bool ShuffleTests
-        {
-            get { return shuffleTests; }
-            set { SetAndNotify(ref shuffleTests, value); }
-        }
-        private bool shuffleTests = Options.OptionShuffleTestsDefaultValue;
-
-        [Category(Options.CategoryName)]
-        [DisplayName(Options.OptionShuffleTestsSeed)]
-        [Description(Options.OptionShuffleTestsSeedDescription)]
-        public int ShuffleTestsSeed
-        {
-            get { return shuffleTestsSeed; }
-            set { SetAndNotify(ref shuffleTestsSeed, value); }
-        }
-        private int shuffleTestsSeed = Options.OptionShuffleTestsSeedDefaultValue;
+        private string pathExtension = Options.OptionPathExtensionDefaultValue;
 
         [Category(Options.CategoryName)]
         [DisplayName(Options.OptionDebugMode)]
@@ -97,6 +66,16 @@ namespace GoogleTestAdapterVSIX.OptionsPages
         private string traitsRegexesAfter = Options.OptionTraitsRegexesDefaultValue;
 
         [Category(Options.CategoryName)]
+        [DisplayName(Options.OptionTestNameSeparator)]
+        [Description(Options.OptionTestNameSeparatorDescription)]
+        public string TestNameSeparator
+        {
+            get { return testNameSeparator; }
+            set { SetAndNotify(ref testNameSeparator, value); }
+        }
+        private string testNameSeparator = Options.OptionTestNameSeparatorDefaultValue;
+
+        [Category(Options.CategoryName)]
         [DisplayName(Options.OptionAdditionalTestExecutionParams)]
         [Description(Options.OptionAdditionalTestExecutionParamsDescription)]
         public string AdditionalTestExecutionParams
@@ -105,6 +84,26 @@ namespace GoogleTestAdapterVSIX.OptionsPages
             set { SetAndNotify(ref additionalTestExecutionParams, value); }
         }
         private string additionalTestExecutionParams = Options.OptionAdditionalTestExecutionParamsDefaultValue;
+
+        [Category(Options.CategoryName)]
+        [DisplayName(Options.OptionBatchForTestSetup)]
+        [Description(Options.OptionBatchForTestSetupDescription)]
+        public string BatchForTestSetup
+        {
+            get { return batchForTestSetup; }
+            set { SetAndNotify(ref batchForTestSetup, value); }
+        }
+        private string batchForTestSetup = Options.OptionBatchForTestSetupDefaultValue;
+
+        [Category(Options.CategoryName)]
+        [DisplayName(Options.OptionBatchForTestTeardown)]
+        [Description(Options.OptionBatchForTestTeardownDescription)]
+        public string BatchForTestTeardown
+        {
+            get { return batchForTestTeardown; }
+            set { SetAndNotify(ref batchForTestTeardown, value); }
+        }
+        private string batchForTestTeardown = Options.OptionBatchForTestTeardownDefaultValue;
     }
 
 }
