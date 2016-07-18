@@ -33,6 +33,9 @@ Information: Found ${NrOfTests} tests in executable ${BaseDir}\SampleTests\${Con
     MessageParserTests.ScopedTraceInHelperMethod
     MessageParserTests.ScopedTraceInTestMethodANdHelperMethod
     MessageParserTests.ScopedTraceInTestMethodANdHelperMethodAndExpectInTestMethod
+    MessageParserTests.ScopedTraceInHelperMethodInOtherFile
+    MessageParserTests.ScopedTraceInTestMethodANdHelperMethodInOtherFile
+    MessageParserTests.ScopedTraceInTestMethodANdHelperMethodAndExpectInTestMethodInOtherFile
     TypedTests/0.CanIterate<std::vector<int,std::allocator<int> > >
     TypedTests/0.CanDefeatMath<std::vector<int,std::allocator<int> > >
     TypedTests/0.TwoTraits<std::vector<int,std::allocator<int> > >
