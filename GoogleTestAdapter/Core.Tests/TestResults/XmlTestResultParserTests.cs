@@ -12,6 +12,8 @@ namespace GoogleTestAdapter.TestResults
     public class XmlTestResultParserTests : AbstractCoreTests
     {
 
+        private readonly ISourceFileFinder _fileFinder = new FakeSourceFileFinder();
+
         [TestMethod]
         [TestCategory(Unit)]
         public void GetTestResults_FileDoesNotExist_WarningAndEmptyResult()
@@ -19,7 +21,7 @@ namespace GoogleTestAdapter.TestResults
             IEnumerable<Model.TestCase> testCases = TestDataCreator.CreateDummyTestCases("BarSuite.BazTest1", "FooSuite.BarTest",
                 "FooSuite.BazTest", "BarSuite.BazTest2");
 
-            var parser = new XmlTestResultParser(testCases, "somefile", TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, "somefile", TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(0);
@@ -34,7 +36,7 @@ namespace GoogleTestAdapter.TestResults
                 "GoogleTestSuiteName1.TestMethod_002");
             MockOptions.Setup(o => o.DebugMode).Returns(true);
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFileBroken, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFileBroken, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(0);
@@ -49,7 +51,7 @@ namespace GoogleTestAdapter.TestResults
                 "GoogleTestSuiteName1.TestMethod_002");
             MockOptions.Setup(o => o.DebugMode).Returns(true);
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFileBroken_InvalidStatusAttibute, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFileBroken_InvalidStatusAttibute, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(1);
@@ -62,7 +64,7 @@ namespace GoogleTestAdapter.TestResults
         {
             IEnumerable<Model.TestCase> testCases = TestDataCreator.CreateDummyTestCases("GoogleTestSuiteName1.TestMethod_001", "SimpleTest.DISABLED_TestMethodDisabled");
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(2);
@@ -76,7 +78,7 @@ namespace GoogleTestAdapter.TestResults
         {
             IEnumerable<Model.TestCase> testCases = TestDataCreator.CreateDummyTestCases("GoogleTestSuiteName1.TestMethod_007");
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "", _fileFinder);
             parser.Invoking(p => p.GetTestResults()).ShouldNotThrow<Exception>();
             MockLogger.Verify(l => l.LogError(It.Is<string>(s => s.Contains("Foo"))), Times.Exactly(1));
         }
@@ -87,7 +89,7 @@ namespace GoogleTestAdapter.TestResults
         {
             IEnumerable<Model.TestCase> testCases = TestDataCreator.CreateDummyTestCases("ParameterizedTestsTest1/AllEnabledTest.TestInstance/7");
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(1);
@@ -100,7 +102,7 @@ namespace GoogleTestAdapter.TestResults
         {
             IEnumerable<Model.TestCase> testCases = TestDataCreator.ToTestCase("AnimalsTest.testGetEnoughAnimals", TestDataCreator.DummyExecutable, @"x:\prod\company\util\util.cpp").Yield();
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(1);
@@ -118,7 +120,7 @@ Should get three animals";
         {
             IEnumerable<Model.TestCase> testCases = TestDataCreator.ToTestCase("ParameterizedTestsTest1/AllEnabledTest.TestInstance/11", TestDataCreator.DummyExecutable, @"someSimpleParameterizedTest.cpp").Yield();
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile1, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(1);
@@ -133,7 +135,7 @@ Should get three animals";
         {
             IEnumerable<Model.TestCase> testCases = TestDataCreator.CreateDummyTestCases("FooTest.DoesXyz");
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile2, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile2, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(1);
@@ -147,7 +149,7 @@ Should get three animals";
             IEnumerable<Model.TestCase> testCases = TestDataCreator.ToTestCase("FooTest.MethodBarDoesAbc", TestDataCreator.DummyExecutable,
                 @"c:\prod\gtest-1.7.0\staticallylinkedgoogletests\main.cpp").Yield();
 
-            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile2, TestEnvironment, "");
+            var parser = new XmlTestResultParser(testCases, TestResources.XmlFile2, TestEnvironment, "", _fileFinder);
             List<Model.TestResult> results = parser.GetTestResults();
 
             results.Count.Should().Be(1);

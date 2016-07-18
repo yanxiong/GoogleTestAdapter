@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using GoogleTestAdapter.Helpers;
+using GoogleTestAdapter.Model;
 
 namespace GoogleTestAdapter.TestResults
 {
@@ -11,11 +13,6 @@ namespace GoogleTestAdapter.TestResults
     public class ErrorMessageParser
     {
         private static readonly string ValidCharRegex;
-
-        private readonly Regex _splitRegex;
-        private readonly Regex _parseRegex;
-        private readonly Regex _scopedTraceStartRegex;
-        private readonly Regex _scopedTraceRegex;
 
         static ErrorMessageParser()
         {
@@ -27,25 +24,38 @@ namespace GoogleTestAdapter.TestResults
         public string ErrorMessage { get; private set; }
         public string ErrorStackTrace { get; private set; }
 
-        private IList<string> ErrorMessages { get; }
+        private readonly TestCase _testCase;
+        private readonly ISourceFileFinder _fileFinder;
 
-        public ErrorMessageParser(string consoleOutput, string baseDir) : this(baseDir)
+        private readonly Regex _splitRegex;
+        private readonly Regex _parseRegex;
+        private readonly Regex _scopedTraceStartRegex;
+        private readonly Regex _scopedTraceRegex;
+
+        private readonly IList<string> _errorMessages;
+
+        public ErrorMessageParser(string consoleOutput, string baseDir, TestCase testCase, ISourceFileFinder finder) 
+            : this(baseDir, testCase, finder)
         {
-            ErrorMessages = SplitConsoleOutput(consoleOutput);
+            _errorMessages = SplitConsoleOutput(consoleOutput);
         }
 
-        public ErrorMessageParser(XmlNodeList failureNodes, string baseDir) : this(baseDir)
+        public ErrorMessageParser(XmlNodeList failureNodes, string baseDir, TestCase testCase, ISourceFileFinder finder) 
+            : this(baseDir, testCase, finder)
         {
-            ErrorMessages = (from XmlNode failureNode in failureNodes select failureNode.InnerText).ToList();
+            _errorMessages = (from XmlNode failureNode in failureNodes select failureNode.InnerText).ToList();
         }
 
-        private ErrorMessageParser(string baseDir)
+        private ErrorMessageParser(string baseDir, TestCase testCase, ISourceFileFinder finder)
         {
             string escapedBaseDir = Regex.Escape(baseDir ?? "");
-            string file = $"({escapedBaseDir}{ValidCharRegex}*)";
+            string file = $"((?:{escapedBaseDir})?{ValidCharRegex}*)";
             string line = "([0-9]+)";
             string fileAndLine = $@"{file}((:{line})|(\({line}\):))";
             string error = @"((error: )|(Failure\n))";
+
+            _testCase = testCase;
+            _fileFinder = finder;
 
             _parseRegex = new Regex($"{fileAndLine}(:? {error})?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             _splitRegex = new Regex($"{fileAndLine}:? {error}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -55,7 +65,7 @@ namespace GoogleTestAdapter.TestResults
 
         public void Parse()
         {
-            switch (ErrorMessages.Count)
+            switch (_errorMessages.Count)
             {
                 case 0:
                     ErrorMessage = "";
@@ -72,7 +82,7 @@ namespace GoogleTestAdapter.TestResults
 
         public static string CreateStackTraceEntry(string label, string fullFileName, string lineNumber)
         {
-            return $"at {label} in {fullFileName}:line {lineNumber}{Environment.NewLine}";
+            return $"at {label} in {fullFileName.ToLower()}:line {lineNumber}{Environment.NewLine}";
         }
 
         private IList<string> SplitConsoleOutput(string errorMessage)
@@ -98,7 +108,7 @@ namespace GoogleTestAdapter.TestResults
 
         private void HandleSingleFailure()
         {
-            string errorMessage = ErrorMessages[0];
+            string errorMessage = _errorMessages[0];
             string stackTrace;
             CreateErrorMessageAndStacktrace(ref errorMessage, out stackTrace);
 
@@ -110,9 +120,9 @@ namespace GoogleTestAdapter.TestResults
         {
             var finalErrorMessages = new List<string>();
             var finalStackTraces = new List<string>();
-            for (int i = 0; i < ErrorMessages.Count; i++)
+            for (int i = 0; i < _errorMessages.Count; i++)
             {
-                string errorMessage = ErrorMessages[i];
+                string errorMessage = _errorMessages[i];
                 int msgId = i + 1;
                 string stackTrace;
                 CreateErrorMessageAndStacktrace(ref errorMessage, out stackTrace, msgId);
@@ -134,7 +144,7 @@ namespace GoogleTestAdapter.TestResults
                 return;
             }
 
-            string fullFileName = match.Groups[1].Value;
+            string fullFileName = _fileFinder.Find(match.Groups[1].Value, _testCase);
             string fileName = Path.GetFileName(fullFileName);
             string lineNumber = match.Groups[4]. Value;
             if (string.IsNullOrEmpty(lineNumber))
@@ -153,9 +163,9 @@ namespace GoogleTestAdapter.TestResults
                 MatchCollection matches = _scopedTraceRegex.Matches(scopedTraces);
                 foreach (Match traceMatch in matches)
                 {
-                    fullFileName = traceMatch.Groups[1].Value;
-                    lineNumber = traceMatch.Groups[2].Value;
                     string traceMessage = traceMatch.Groups[3].Value.Trim();
+                    fullFileName = _fileFinder.Find(traceMatch.Groups[1].Value, traceMessage);
+                    lineNumber = traceMatch.Groups[2].Value;
 
                     stackTrace += CreateStackTraceEntry($"-->{traceMessage}", fullFileName, lineNumber);
                 }

@@ -66,6 +66,7 @@ namespace GoogleTestAdapter.Runners
             string resultXmlFile = Path.GetTempFileName();
             string workingDir = Path.GetDirectoryName(executable);
             var serializer = new TestDurationSerializer();
+            var finder = new SourceFileFinder(baseDir);
 
             var generator = new CommandLineGenerator(allTestCases, testCasesToRun, executable.Length, userParameters, resultXmlFile, _testEnvironment);
             foreach (CommandLineGenerator.Args arguments in generator.GetCommandLines())
@@ -77,7 +78,7 @@ namespace GoogleTestAdapter.Runners
 
                 _frameworkReporter.ReportTestsStarted(arguments.TestCases);
                 List<string> consoleOutput = new TestProcessLauncher(_testEnvironment, isBeingDebugged).GetOutputOfCommand(workingDir, executable, arguments.CommandLine, _testEnvironment.Options.PrintTestOutput && !_testEnvironment.Options.ParallelTestExecution, false, debuggedLauncher);
-                IEnumerable<TestResult> results = CollectTestResults(arguments.TestCases, resultXmlFile, consoleOutput, baseDir);
+                IEnumerable<TestResult> results = CollectTestResults(arguments.TestCases, resultXmlFile, consoleOutput, baseDir, finder);
 
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 _frameworkReporter.ReportTestResults(results);
@@ -88,13 +89,13 @@ namespace GoogleTestAdapter.Runners
             }
         }
 
-        private List<TestResult> CollectTestResults(IEnumerable<TestCase> testCasesRun, string resultXmlFile, List<string> consoleOutput, string baseDir)
+        private List<TestResult> CollectTestResults(IEnumerable<TestCase> testCasesRun, string resultXmlFile, List<string> consoleOutput, string baseDir, SourceFileFinder finder)
         {
             var testResults = new List<TestResult>();
 
             TestCase[] testCasesRunAsArray = testCasesRun as TestCase[] ?? testCasesRun.ToArray();
-            var xmlParser = new XmlTestResultParser(testCasesRunAsArray, resultXmlFile, _testEnvironment, baseDir);
-            var consoleParser = new StandardOutputTestResultParser(testCasesRunAsArray, consoleOutput, _testEnvironment, baseDir);
+            var xmlParser = new XmlTestResultParser(testCasesRunAsArray, resultXmlFile, _testEnvironment, baseDir, finder);
+            var consoleParser = new StandardOutputTestResultParser(testCasesRunAsArray, consoleOutput, _testEnvironment, baseDir, finder);
 
             testResults.AddRange(xmlParser.GetTestResults());
             _testEnvironment.DebugInfo($"Collected {testResults.Count} test results from XML result file '{resultXmlFile}'");

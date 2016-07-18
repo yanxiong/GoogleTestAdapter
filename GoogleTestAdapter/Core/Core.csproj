@@ -49,7 +49,9 @@
     <Compile Include="GoogleTestExecutor.cs" />
     <Compile Include="Helpers\DebugUtils.cs" />
     <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\ISourceFileFinder.cs" />
     <Compile Include="Helpers\ProcessLauncher.cs" />
+    <Compile Include="Helpers\SourceFileFinder.cs" />
     <Compile Include="Helpers\TestProcessLauncher.cs" />
     <Compile Include="Helpers\RegexTraitParser.cs" />
     <Compile Include="TestCases\ListTestsParser.cs" />

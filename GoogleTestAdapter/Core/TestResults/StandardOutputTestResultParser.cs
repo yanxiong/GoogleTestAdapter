@@ -21,14 +21,16 @@ namespace GoogleTestAdapter.TestResults
         private readonly List<TestCase> _testCasesRun;
         private readonly TestEnvironment _testEnvironment;
         private readonly string _baseDir;
+        private readonly ISourceFileFinder _fileFinder;
 
 
-        public StandardOutputTestResultParser(IEnumerable<TestCase> testCasesRun, IEnumerable<string> consoleOutput, TestEnvironment testEnvironment, string baseDir)
+        public StandardOutputTestResultParser(IEnumerable<TestCase> testCasesRun, IEnumerable<string> consoleOutput, TestEnvironment testEnvironment, string baseDir, ISourceFileFinder finder)
         {
             _consoleOutput = consoleOutput.ToList();
             _testCasesRun = testCasesRun.ToList();
             _testEnvironment = testEnvironment;
             _baseDir = baseDir;
+            _fileFinder = finder;
         }
 
 
@@ -70,7 +72,7 @@ namespace GoogleTestAdapter.TestResults
             }
             if (IsFailedLine(line))
             {
-                ErrorMessageParser parser = new ErrorMessageParser(errorMsg, _baseDir);
+                var parser = new ErrorMessageParser(errorMsg, _baseDir, testCase, _fileFinder);
                 parser.Parse();
                 return CreateFailedTestResult(testCase, ParseDuration(line), parser.ErrorMessage, parser.ErrorStackTrace);
             }

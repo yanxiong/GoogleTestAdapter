@@ -12,7 +12,7 @@ void CheckIfZero(int i)
 	EXPECT_EQ(0, i);
 }
 
-void HelperMethodWithScopedTrace()
+void LocalHelperMethodWithScopedTrace()
 {
 	SCOPED_TRACE("HelperMethod");
 	CheckIfZero(1);
@@ -68,18 +68,36 @@ TEST(MessageParserTests, TwoScopedTracesInTestMethod)
 
 TEST(MessageParserTests, ScopedTraceInHelperMethod)
 {
-	HelperMethodWithScopedTrace();
+	LocalHelperMethodWithScopedTrace();
 }
 
 TEST(MessageParserTests, ScopedTraceInTestMethodANdHelperMethod)
 {
 	SCOPED_TRACE("TestMethod");
-	HelperMethodWithScopedTrace();
+	LocalHelperMethodWithScopedTrace();
 }
 
 TEST(MessageParserTests, ScopedTraceInTestMethodANdHelperMethodAndExpectInTestMethod)
 {
 	SCOPED_TRACE("TestMethod");
-	HelperMethodWithScopedTrace();
+	LocalHelperMethodWithScopedTrace();
+	EXPECT_EQ(0, 1);
+}
+
+TEST(MessageParserTests, ScopedTraceInHelperMethodInOtherFile)
+{
+	HelpMethodWithScopedTrace();
+}
+
+TEST(MessageParserTests, ScopedTraceInTestMethodANdHelperMethodInOtherFile)
+{
+	SCOPED_TRACE("TestMethod");
+	HelpMethodWithScopedTrace();
+}
+
+TEST(MessageParserTests, ScopedTraceInTestMethodANdHelperMethodAndExpectInTestMethodInOtherFile)
+{
+	SCOPED_TRACE("TestMethod");
+	HelpMethodWithScopedTrace();
 	EXPECT_EQ(0, 1);
 }

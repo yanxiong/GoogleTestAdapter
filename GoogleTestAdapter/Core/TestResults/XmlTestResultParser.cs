@@ -21,14 +21,16 @@ namespace GoogleTestAdapter.TestResults
         private readonly string _baseDir;
         private readonly string _xmlResultFile;
         private readonly IDictionary<string, TestCase> _testCasesMap;
+        private readonly ISourceFileFinder _fileFinder;
 
 
-        public XmlTestResultParser(IEnumerable<TestCase> testCasesRun, string xmlResultFile, TestEnvironment testEnvironment, string baseDir)
+        public XmlTestResultParser(IEnumerable<TestCase> testCasesRun, string xmlResultFile, TestEnvironment testEnvironment, string baseDir, ISourceFileFinder finder)
         {
             _testEnvironment = testEnvironment;
             _baseDir = baseDir;
             _xmlResultFile = xmlResultFile;
             _testCasesMap = testCasesRun.ToDictionary(tc => tc.FullyQualifiedName, tc => tc);
+            _fileFinder = finder;
         }
 
 
@@ -113,7 +115,7 @@ namespace GoogleTestAdapter.TestResults
                     }
                     else
                     {
-                        var parser = new ErrorMessageParser(failureNodes, _baseDir);
+                        var parser = new ErrorMessageParser(failureNodes, _baseDir, testCase, _fileFinder);
                         parser.Parse();
                         testResult.Outcome = TestOutcome.Failed;
                         testResult.ErrorMessage = parser.ErrorMessage;

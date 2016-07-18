@@ -152,6 +152,8 @@
   <ItemGroup>
     <ClCompile Include="$(SolutionDir)\3rdparty\gtest-1.7.0\fused-src\gtest\gtest-all.cc" />
     <ClCompile Include="CrashingTests.cpp" />
+    <ClCompile Include="BasicTests.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LibProject\LibProject.vcxproj">

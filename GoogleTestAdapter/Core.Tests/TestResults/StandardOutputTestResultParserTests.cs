@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentAssertions;
+using GoogleTestAdapter.Helpers;
 using GoogleTestAdapter.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -204,7 +205,7 @@ namespace GoogleTestAdapter.TestResults
             cases.Add(TestDataCreator.ToTestCase("TestMath.AddFails", TestDataCreator.DummyExecutable, @"c:\users\chris\documents\visual studio 2015\projects\consoleapplication1\consoleapplication1tests\source.cpp"));
             cases.Add(TestDataCreator.ToTestCase("TestMath.Crash", TestDataCreator.DummyExecutable, @"c:\users\chris\documents\visual studio 2015\projects\consoleapplication1\consoleapplication1tests\source.cpp"));
             cases.Add(TestDataCreator.ToTestCase("TestMath.AddPasses", TestDataCreator.DummyExecutable, @"c:\users\chris\documents\visual studio 2015\projects\consoleapplication1\consoleapplication1tests\source.cpp"));
-            StandardOutputTestResultParser parser = new StandardOutputTestResultParser(cases, consoleOutput, TestEnvironment, @"c:\users\chris\documents\visual studio 2015\projects\consoleapplication1\");
+            StandardOutputTestResultParser parser = new StandardOutputTestResultParser(cases, consoleOutput, TestEnvironment, @"c:\users\chris\documents\visual studio 2015\projects\consoleapplication1\", new FakeSourceFileFinder());
             return parser.GetTestResults();
         }
 
