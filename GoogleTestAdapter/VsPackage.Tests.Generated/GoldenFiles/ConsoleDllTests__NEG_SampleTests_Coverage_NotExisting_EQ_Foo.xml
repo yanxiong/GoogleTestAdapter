@@ -170,6 +170,15 @@ Expected: 0</Message>
         </ErrorInfo>
       </Output>
     </UnitTestResult>
+    <UnitTestResult testName="MessageParserTests.ScopedTraceInHelperMethodInOtherFile" outcome="Failed">
+      <Output>
+        <ErrorInfo>
+          <Message>Value of: i
+  Actual: 1
+Expected: 0</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
     <UnitTestResult testName="MessageParserTests.ScopedTraceInTestMethod" outcome="Failed">
       <Output>
         <ErrorInfo>
@@ -195,6 +204,26 @@ Expected: 0</Message>
   Actual: 1
 Expected: 0
 #2 - Value of: 1
+Expected: 0</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult testName="MessageParserTests.ScopedTraceInTestMethodANdHelperMethodAndExpectInTestMethodInOtherFile" outcome="Failed">
+      <Output>
+        <ErrorInfo>
+          <Message>#1 - Value of: i
+  Actual: 1
+Expected: 0
+#2 - Value of: 1
+Expected: 0</Message>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult testName="MessageParserTests.ScopedTraceInTestMethodANdHelperMethodInOtherFile" outcome="Failed">
+      <Output>
+        <ErrorInfo>
+          <Message>Value of: i
+  Actual: 1
 Expected: 0</Message>
         </ErrorInfo>
       </Output>
@@ -415,7 +444,7 @@ SEH exception with code 0xc0000005 thrown in the test body.</Message>
     </UnitTestResult>
   </Results>
   <ResultSummary outcome="Failed">
-    <Counters total="78" executed="78" passed="35" failed="43" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Counters total="81" executed="81" passed="35" failed="46" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
     <Output />
   </ResultSummary>
 </TestRun>
