@@ -46,6 +46,12 @@ namespace GoogleTestAdapter
         }
 
         [TestMethod]
+        public override void GetTestsFromExecutable_SampleTests_FindsUmlautTestWithUmlautTrait()
+        {
+            base.GetTestsFromExecutable_SampleTests_FindsUmlautTestWithUmlautTrait();
+        }
+
+        [TestMethod]
         public override void GetTestsFromExecutable_SampleTests_FindsFixtureTestWithThreeTraits()
         {
             base.GetTestsFromExecutable_SampleTests_FindsFixtureTestWithThreeTraits();

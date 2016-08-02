@@ -42,7 +42,7 @@ TEST_P_TRAITS(ParameterizedTests, SimpleTraits3, Type, Medium, Author, MSI, Test
 
 INSTANTIATE_TEST_CASE_P(InstantiationName,
 	ParameterizedTests,
-	testing::Values(MyParam("", 1), MyParam("!", 1), MyParam("", -1))
+	testing::Values(MyParam("", 1), MyParam("!", 1), MyParam("дцья", -1))
 	);
 
 INSTANTIATE_TEST_CASE_P(/* no instantiation name*/,

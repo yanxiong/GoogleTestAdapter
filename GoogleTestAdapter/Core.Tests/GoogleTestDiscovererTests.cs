@@ -192,6 +192,15 @@ namespace GoogleTestAdapter
             actualDuration.Should().BeLessThan(maxDuration);
         }
 
+        [TestMethod]
+        [TestCategory(Integration)]
+        public void GetTestsFromExecutable_SampleTests_FindsParameterizedTestWithUmlaut()
+        {
+            AssertFindsParameterizedTest(
+                "InstantiationName/ParameterizedTests.SimpleTraits/2",
+                "InstantiationName/ParameterizedTests.SimpleTraits/2 [(-1,äöüß)]");
+        }
+
         private void AssertIsGoogleTestExecutable(string executable, bool isGoogleTestExecutable, string regex = "")
         {
             new GoogleTestDiscoverer(TestEnvironment).IsGoogleTestExecutable(executable, regex)

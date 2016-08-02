@@ -39,6 +39,14 @@ namespace GoogleTestAdapter
 
         [TestMethod]
         [TestCategory(Integration)]
+        public virtual void GetTestsFromExecutable_SampleTests_FindsUmlautTestWithUmlautTrait()
+        {
+            Trait[] traits = { new Trait("Träit", "Valüe") };
+            AssertFindsTestWithTraits("Fixtüre.TästWithUmlöuten", traits);
+        }
+
+        [TestMethod]
+        [TestCategory(Integration)]
         public virtual void GetTestsFromExecutable_SampleTests_FindsFixtureTestWithTwoTraits()
         {
             Trait[] traits = { new Trait("Type", "Small"), new Trait("Author", "CSO") };

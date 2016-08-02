@@ -12,6 +12,11 @@ TEST(Crashing, AddFailsBeforeCrash)
 	EXPECT_EQ(1000, Add(10, 10));
 }
 
+TEST(Crashing, AddFailsWith‹mlautBeforeCrash)
+{
+	EXPECT_EQ(0, 1) << "‹mlaut t‰st";
+}
+
 TEST(Crashing, AddPassesBeforeCrash)
 {
 	EXPECT_EQ(20, Add(10, 10));

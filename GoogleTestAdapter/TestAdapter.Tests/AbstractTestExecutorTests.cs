@@ -133,7 +133,7 @@ namespace GoogleTestAdapter.TestAdapter
             TestExecutor executor = new TestExecutor(TestEnvironment);
             executor.RunTests(TestResources.HardCrashingSampleTests.Yield(), MockRunContext.Object, MockFrameworkHandle.Object);
 
-            CheckMockInvocations(1, 2, 0, 3);
+            CheckMockInvocations(1, 3, 0, 3);
         }
 
         [TestMethod]

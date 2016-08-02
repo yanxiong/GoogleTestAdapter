@@ -85,3 +85,8 @@ TEST_TRAITS(Traits, With1Traits, Trait1, Equals1)
 {
 	EXPECT_EQ(1, 1);
 }
+
+TEST_TRAITS(Fixtüre, TästWithUmlöuten, Träit, Valüe)
+{
+	EXPECT_EQ(1, 0) << "Teßt failed";
+}
