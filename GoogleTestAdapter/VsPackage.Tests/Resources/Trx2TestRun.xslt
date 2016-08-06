@@ -7,15 +7,29 @@
   <xsl:output method="xml" indent="yes" />
   <msxsl:script language="C#" implements-prefix="regex">
     <msxsl:assembly name="System.Text.RegularExpressions" />
+    <msxsl:assembly name="System.IO" />
     <msxsl:using namespace="System.Text.RegularExpressions" />
+    <msxsl:using namespace="System.IO" />
     <![CDATA[
-      public string replace(string input, string pattern, string replacement)
-      {
-        return Regex.Replace(input, pattern, replacement);
-      }
+        public string replace(string input, string pattern, string replacement)
+        {
+            string validFileCharsRegex = "[^" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]+";
+            string validDirCharsRegex = "[^" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]+";
+            pattern = pattern
+                .Replace("_FILE_", validFileCharsRegex)
+                .Replace("_DIR_", validDirCharsRegex);
+
+            input = Regex.Replace(input, @"\\(Debug|Release)\\", @"\${ConfigurationName}\", RegexOptions.IgnoreCase);
+            return Regex.Replace(input, pattern, replacement, RegexOptions.IgnoreCase);
+        }
+        
+        public string replacePointer(string text)
+        {
+          return Regex.Replace(text, "([0-9A-F]{8}){1,2} pointing to", "${MemoryLocation} pointing to", RegexOptions.IgnoreCase);
+        }
     ]]>
   </msxsl:script>
-
+  
   <xsl:template match="ms:TestRun">
     <TestRun>
       <xsl:apply-templates />
@@ -31,7 +45,7 @@
   <xsl:template match="ms:UnitTestResult">
     <UnitTestResult>
       <xsl:attribute name="testName">
-        <xsl:value-of select="regex:replace(@testName, '([0-9A-F]{8}){1,2} pointing to', '${MemoryLocation} pointing to')" />
+        <xsl:value-of select="regex:replacePointer(@testName)" />
       </xsl:attribute>
       <xsl:attribute name="outcome">
         <xsl:value-of select="@outcome" />
@@ -52,11 +66,90 @@
     </ErrorInfo>
   </xsl:template>
 
+  <xsl:template match="ms:StackTrace">
+    <StackTrace>
+      <xsl:value-of select="regex:replace(., '[a-z]:\\+(?:_DIR_\\)*(sampletests\\(?:_DIR_\\)*_FILE_:line \d+)', '$(Directory)\$1')" />
+      <xsl:apply-templates />
+    </StackTrace>
+  </xsl:template>
+
   <xsl:template match="ms:Message">
     <Message>
       <xsl:value-of select="." />
     </Message>
   </xsl:template>
+
+  <xsl:template match="ms:TestDefinitions">
+    <TestDefinitions>
+      <xsl:apply-templates />
+    </TestDefinitions>
+  </xsl:template>
+
+  <xsl:template match="ms:UnitTest">
+    <UnitTest>
+      <xsl:attribute name="name">
+        <xsl:value-of select="regex:replacePointer(@name)" />
+      </xsl:attribute>
+      <xsl:attribute name="storage">
+        <xsl:value-of select="regex:replace(@storage, '(?:[a-z]:\\+)?(?:_DIR_\\)*(sampletests\\(?:_DIR_\\)*_FILE_)', '$(Directory)\$1')" />
+      </xsl:attribute>
+      <xsl:apply-templates />
+    </UnitTest>
+  </xsl:template>
+
+  <xsl:template match="ms:TestMethod">
+    <TestMethod>
+      <xsl:attribute name="name">
+        <xsl:value-of select="regex:replacePointer(@name)" />
+      </xsl:attribute>
+      <xsl:attribute name="className">
+        <xsl:value-of select="@className" />
+      </xsl:attribute>
+      <xsl:attribute name="adapterTypeName">
+        <xsl:value-of select="@adapterTypeName" />
+      </xsl:attribute>
+      <xsl:attribute name="codeBase">
+        <xsl:value-of select="regex:replace(@codeBase, '(?:[a-z]:\\+)?(?:_DIR_\\)*(sampletests\\(?:_DIR_\\)*_FILE_)', '$(Directory)\$1')" />
+      </xsl:attribute>
+    </TestMethod>
+  </xsl:template>
+
+  <xsl:template match="ms:TestLists">
+    <TestLists>
+      <xsl:apply-templates />
+    </TestLists>
+  </xsl:template>
+
+  <xsl:template match="ms:TestList">
+    <TestList>
+      <xsl:attribute name="name">
+        <xsl:value-of select="@name" />
+      </xsl:attribute>
+    </TestList>
+  </xsl:template>
+
+<!--
+  <xsl:template match="ms:RunInfos">
+    <RunInfos>
+      <xsl:apply-templates />
+    </RunInfos>
+  </xsl:template>
+
+  <xsl:template match="ms:RunInfo">
+    <RunInfo>
+      <xsl:attribute name="outcome">
+        <xsl:value-of select="@outcome" />
+      </xsl:attribute>
+      <xsl:apply-templates />
+    </RunInfo>
+  </xsl:template>
+
+  <xsl:template match="ms:Text">
+    <Text>
+      <xsl:value-of select="." />
+    </Text>
+  </xsl:template>
+-->
 
   <xsl:template match="ms:ResultSummary">
     <ResultSummary>
